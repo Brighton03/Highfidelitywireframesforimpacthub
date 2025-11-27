@@ -2,43 +2,54 @@
 
 :root {
   --font-size: 16px;
-  --background: #ffffff;
-  --foreground: oklch(0.145 0 0);
+  --background: #F5F7FA;
+  --foreground: #2C3E50;
+  
+  /* Heartfelt Hands Brand Colors */
+  --sage-green: #779F8D;
+  --sage-green-light: #9DBAA9;
+  --sage-green-lighter: #C4D7CC;
+  --sage-green-bg: #F0F7F4;
+  --dark-grey: #2C3E50;
+  --error-red: #E57373;
+  --warning-orange: #FFB74D;
+  --success-green: #779F8D;
+  
   --card: #ffffff;
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: #2C3E50;
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #030213;
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.0058 264.53);
-  --secondary-foreground: #030213;
+  --popover-foreground: #2C3E50;
+  --primary: #779F8D;
+  --primary-foreground: #ffffff;
+  --secondary: #2C3E50;
+  --secondary-foreground: #ffffff;
   --muted: #ececf0;
   --muted-foreground: #717182;
-  --accent: #e9ebef;
-  --accent-foreground: #030213;
-  --destructive: #d4183d;
+  --accent: #F0F7F4;
+  --accent-foreground: #2C3E50;
+  --destructive: #E57373;
   --destructive-foreground: #ffffff;
   --border: rgba(0, 0, 0, 0.1);
   --input: transparent;
-  --input-background: #f3f3f5;
+  --input-background: #ffffff;
   --switch-background: #cbced4;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #030213;
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --ring: #779F8D;
+  --chart-1: #779F8D;
+  --chart-2: #2C3E50;
+  --chart-3: #FFB74D;
+  --chart-4: #E57373;
+  --chart-5: #9DBAA9;
+  --radius: 0.75rem;
+  --sidebar: #2C3E50;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #779F8D;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-ring: #779F8D;
 }
 
 .dark {

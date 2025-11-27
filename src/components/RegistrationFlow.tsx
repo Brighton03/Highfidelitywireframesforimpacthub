@@ -10,9 +10,28 @@ export function RegistrationFlow() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F5F7FA' }}>
       {/* Progress Indicator */}
-      <div className="w-full bg-white border-b" style={{ borderColor: '#E0E0E0' }}>
-        <div className="max-w-[800px] mx-auto px-8 py-6">
-          <div className="flex items-center justify-between">
+      <div className="w-full bg-white border-b shadow-sm" style={{ borderColor: '#E0E0E0' }}>
+        <div className="max-w-[800px] mx-auto px-8 py-8">
+          <div className="relative flex items-center justify-between">
+            {/* Progress Line Background */}
+            <div 
+              className="absolute top-5 left-0 right-0 h-1 -z-10"
+              style={{ 
+                backgroundColor: '#E0E0E0',
+                marginLeft: '20px',
+                marginRight: '20px'
+              }}
+            />
+            {/* Progress Line Fill */}
+            <div 
+              className="absolute top-5 left-0 h-1 -z-10 transition-all"
+              style={{ 
+                backgroundColor: '#779F8D',
+                marginLeft: '20px',
+                width: `calc(${(['registration', 'otp', 'profile', 'skills', 'confirmation'].indexOf(step) / 4) * 100}% - 40px)`
+              }}
+            />
+
             {['Registration', 'Verify', 'Profile', 'Skills', 'Complete'].map((label, index) => {
               const stepNames = ['registration', 'otp', 'profile', 'skills', 'confirmation'];
               const currentIndex = stepNames.indexOf(step);
@@ -20,29 +39,23 @@ export function RegistrationFlow() {
               const isCompleted = index < currentIndex;
 
               return (
-                <div key={label} className="flex items-center">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className="w-10 h-10 flex items-center justify-center mb-2"
-                      style={{
-                        backgroundColor: isActive || isCompleted ? '#779F8D' : '#E0E0E0',
-                        borderRadius: '50%',
-                        color: '#FFFFFF',
-                        fontWeight: 600
-                      }}
-                    >
-                      {isCompleted ? <CheckCircle2 size={20} /> : index + 1}
-                    </div>
-                    <span style={{ color: isActive ? '#2C3E50' : '#9E9E9E', fontSize: '14px', fontWeight: isActive ? 600 : 400 }}>
-                      {label}
-                    </span>
+                <div key={label} className="flex flex-col items-center relative">
+                  <div
+                    className="w-10 h-10 flex items-center justify-center mb-2 transition-all"
+                    style={{
+                      backgroundColor: isActive || isCompleted ? '#779F8D' : '#E0E0E0',
+                      borderRadius: '50%',
+                      color: '#FFFFFF',
+                      fontWeight: 600,
+                      boxShadow: isActive ? '0 4px 12px rgba(119, 159, 141, 0.4)' : 'none',
+                      zIndex: 10
+                    }}
+                  >
+                    {isCompleted ? <CheckCircle2 size={20} /> : index + 1}
                   </div>
-                  {index < 4 && (
-                    <div
-                      className="w-16 h-1 mb-6 mx-2"
-                      style={{ backgroundColor: isCompleted ? '#779F8D' : '#E0E0E0' }}
-                    />
-                  )}
+                  <span style={{ color: isActive ? '#2C3E50' : '#9E9E9E', fontSize: '14px', fontWeight: isActive ? 600 : 400 }}>
+                    {label}
+                  </span>
                 </div>
               );
             })}
@@ -74,12 +87,13 @@ export function RegistrationFlow() {
                   <input
                     type="text"
                     placeholder="Enter your full name"
-                    className="w-full pl-10 pr-4 py-3 border"
+                    className="w-full pl-10 pr-4 border"
                     style={{
                       borderColor: '#E0E0E0',
-                      borderRadius: '8px',
+                      borderRadius: '12px',
                       color: '#2C3E50',
-                      outline: 'none'
+                      outline: 'none',
+                      height: '48px'
                     }}
                   />
                 </div>
