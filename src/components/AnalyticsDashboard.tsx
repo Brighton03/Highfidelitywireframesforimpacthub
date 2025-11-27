@@ -1,5 +1,5 @@
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Users, Clock, DollarSign } from 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { TrendingUp, Users, Clock, DollarSign, Award, AlertCircle, CheckCircle } from 'lucide-react';
 
 export function AnalyticsDashboard() {
   const participationData = [
@@ -24,205 +24,437 @@ export function AnalyticsDashboard() {
 
   return (
     <div className="p-8">
-      <h1 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '32px', marginBottom: '24px' }}>
-        Global Analytics Dashboard
-      </h1>
+      <div className="max-w-[1600px] mx-auto">
+        <h1 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '40px', marginBottom: '8px' }}>
+          Global Analytics Dashboard
+        </h1>
+        <p style={{ color: '#2C3E50', fontSize: '18px', opacity: 0.8, marginBottom: '32px' }}>
+          Strategic oversight and key performance indicators
+        </p>
 
-      {/* Top Metrics Cards */}
-      <div className="grid grid-cols-4 gap-6 mb-8">
-        <div 
-          className="p-6"
-          style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div 
-              className="w-12 h-12 flex items-center justify-center"
-              style={{ backgroundColor: '#F0F7F4', borderRadius: '8px' }}
-            >
-              <Clock size={24} style={{ color: '#779F8D' }} />
-            </div>
-            <TrendingUp size={20} style={{ color: '#81C784' }} />
-          </div>
-          <div style={{ color: '#2C3E50', fontSize: '32px', fontWeight: 700, marginBottom: '4px' }}>
-            5,840
-          </div>
-          <div style={{ color: '#2C3E50', fontSize: '14px' }}>
-            Total Volunteer Hours (YTD)
-          </div>
-          <div style={{ color: '#81C784', fontSize: '12px', marginTop: '8px' }}>
-            +12% from last year
-          </div>
-        </div>
-
-        <div 
-          className="p-6"
-          style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div 
-              className="w-12 h-12 flex items-center justify-center"
-              style={{ backgroundColor: '#F0F7F4', borderRadius: '8px' }}
-            >
-              <Users size={24} style={{ color: '#779F8D' }} />
-            </div>
-            <TrendingUp size={20} style={{ color: '#81C784' }} />
-          </div>
-          <div style={{ color: '#2C3E50', fontSize: '32px', fontWeight: 700, marginBottom: '4px' }}>
-            342
-          </div>
-          <div style={{ color: '#2C3E50', fontSize: '14px' }}>
-            Active Volunteers
-          </div>
-          <div style={{ color: '#81C784', fontSize: '12px', marginTop: '8px' }}>
-            +8% from last month
-          </div>
-        </div>
-
-        <div 
-          className="p-6"
-          style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div 
-              className="w-12 h-12 flex items-center justify-center"
-              style={{ backgroundColor: '#FFF8E1', borderRadius: '8px' }}
-            >
-              <DollarSign size={24} style={{ color: '#FFB74D' }} />
-            </div>
-          </div>
-          <div style={{ color: '#2C3E50', fontSize: '32px', fontWeight: 700, marginBottom: '4px' }}>
-            $183K
-          </div>
-          <div style={{ color: '#2C3E50', fontSize: '14px' }}>
-            Grant Metrics Status
-          </div>
-          <div style={{ color: '#FFB74D', fontSize: '12px', marginTop: '8px' }}>
-            92% of annual target
-          </div>
-        </div>
-
-        <div 
-          className="p-6"
-          style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div 
-              className="w-12 h-12 flex items-center justify-center"
-              style={{ backgroundColor: '#F0F7F4', borderRadius: '8px' }}
-            >
-              <TrendingUp size={24} style={{ color: '#779F8D' }} />
-            </div>
-            <TrendingUp size={20} style={{ color: '#81C784' }} />
-          </div>
-          <div style={{ color: '#2C3E50', fontSize: '32px', fontWeight: 700, marginBottom: '4px' }}>
-            89%
-          </div>
-          <div style={{ color: '#2C3E50', fontSize: '14px' }}>
-            Volunteer Retention Rate
-          </div>
-          <div style={{ color: '#81C784', fontSize: '12px', marginTop: '8px' }}>
-            +3% from last quarter
-          </div>
-        </div>
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-2 gap-6">
-        {/* Participation Trends */}
-        <div 
-          className="p-6"
-          style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}
-        >
-          <h2 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '20px', marginBottom: '24px' }}>
-            Participation Trends
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={participationData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
-              <XAxis 
-                dataKey="month" 
-                stroke="#2C3E50"
-                style={{ fontSize: '12px' }}
-              />
-              <YAxis 
-                stroke="#2C3E50"
-                style={{ fontSize: '12px' }}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#FFFFFF',
-                  border: '1px solid #E0E0E0',
-                  borderRadius: '8px'
+        <div className="grid grid-cols-12 gap-8">
+          {/* Main Content - 9 cols */}
+          <div className="col-span-9 space-y-8">
+            {/* KPI Cards with Colored Top Borders */}
+            <div className="grid grid-cols-4 gap-6">
+              {/* Total Hours - Green */}
+              <div 
+                className="p-6 shadow-lg"
+                style={{ 
+                  backgroundColor: '#ffffff',
+                  borderRadius: '16px',
+                  borderTop: '6px solid #779F8D'
                 }}
-              />
-              <Legend 
-                wrapperStyle={{ fontSize: '14px' }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="hours" 
-                stroke="#779F8D" 
-                strokeWidth={2}
-                name="Total Hours"
-                dot={{ fill: '#779F8D', r: 4 }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="volunteers" 
-                stroke="#2C3E50" 
-                strokeWidth={2}
-                name="Active Volunteers"
-                dot={{ fill: '#2C3E50', r: 4 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div 
+                    className="w-14 h-14 flex items-center justify-center"
+                    style={{ backgroundColor: '#F0F7F4', borderRadius: '12px' }}
+                  >
+                    <Clock size={28} style={{ color: '#779F8D' }} />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <TrendingUp size={16} style={{ color: '#779F8D' }} />
+                    <span style={{ color: '#779F8D', fontSize: '12px', fontWeight: 700 }}>
+                      +18%
+                    </span>
+                  </div>
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '40px', fontWeight: 700, marginBottom: '4px', lineHeight: 1 }}>
+                  5,840
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '14px', opacity: 0.7 }}>
+                  Total Volunteer Hours
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '12px', opacity: 0.6, marginTop: '8px' }}>
+                  Year to Date
+                </div>
+              </div>
 
-        {/* Donations vs Targets */}
-        <div 
-          className="p-6"
-          style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}
-        >
-          <h2 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '20px', marginBottom: '24px' }}>
-            Donations vs Targets
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={donationData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
-              <XAxis 
-                dataKey="quarter" 
-                stroke="#2C3E50"
-                style={{ fontSize: '12px' }}
-              />
-              <YAxis 
-                stroke="#2C3E50"
-                style={{ fontSize: '12px' }}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#FFFFFF',
-                  border: '1px solid #E0E0E0',
-                  borderRadius: '8px'
+              {/* Active Volunteers - Green */}
+              <div 
+                className="p-6 shadow-lg"
+                style={{ 
+                  backgroundColor: '#ffffff',
+                  borderRadius: '16px',
+                  borderTop: '6px solid #779F8D'
                 }}
-                formatter={(value) => `$${(value as number).toLocaleString()}`}
-              />
-              <Legend 
-                wrapperStyle={{ fontSize: '14px' }}
-              />
-              <Bar 
-                dataKey="target" 
-                fill="#E0E0E0" 
-                name="Target"
-                radius={[8, 8, 0, 0]}
-              />
-              <Bar 
-                dataKey="actual" 
-                fill="#779F8D" 
-                name="Actual"
-                radius={[8, 8, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div 
+                    className="w-14 h-14 flex items-center justify-center"
+                    style={{ backgroundColor: '#F0F7F4', borderRadius: '12px' }}
+                  >
+                    <Users size={28} style={{ color: '#779F8D' }} />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <TrendingUp size={16} style={{ color: '#779F8D' }} />
+                    <span style={{ color: '#779F8D', fontSize: '12px', fontWeight: 700 }}>
+                      +12%
+                    </span>
+                  </div>
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '40px', fontWeight: 700, marginBottom: '4px', lineHeight: 1 }}>
+                  245
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '14px', opacity: 0.7 }}>
+                  Active Volunteers
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '12px', opacity: 0.6, marginTop: '8px' }}>
+                  Last 30 Days
+                </div>
+              </div>
+
+              {/* Total Donations - Blue */}
+              <div 
+                className="p-6 shadow-lg"
+                style={{ 
+                  backgroundColor: '#ffffff',
+                  borderRadius: '16px',
+                  borderTop: '6px solid #2C3E50'
+                }}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div 
+                    className="w-14 h-14 flex items-center justify-center"
+                    style={{ backgroundColor: '#E8F4F8', borderRadius: '12px' }}
+                  >
+                    <DollarSign size={28} style={{ color: '#2C3E50' }} />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <TrendingUp size={16} style={{ color: '#779F8D' }} />
+                    <span style={{ color: '#779F8D', fontSize: '12px', fontWeight: 700 }}>
+                      +8%
+                    </span>
+                  </div>
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '40px', fontWeight: 700, marginBottom: '4px', lineHeight: 1 }}>
+                  $183K
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '14px', opacity: 0.7 }}>
+                  Total Donations
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '12px', opacity: 0.6, marginTop: '8px' }}>
+                  Year to Date
+                </div>
+              </div>
+
+              {/* Events Completed - Orange */}
+              <div 
+                className="p-6 shadow-lg"
+                style={{ 
+                  backgroundColor: '#ffffff',
+                  borderRadius: '16px',
+                  borderTop: '6px solid #FFB74D'
+                }}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div 
+                    className="w-14 h-14 flex items-center justify-center"
+                    style={{ backgroundColor: '#FFF8E1', borderRadius: '12px' }}
+                  >
+                    <Award size={28} style={{ color: '#FFB74D' }} />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <TrendingUp size={16} style={{ color: '#779F8D' }} />
+                    <span style={{ color: '#779F8D', fontSize: '12px', fontWeight: 700 }}>
+                      +25%
+                    </span>
+                  </div>
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '40px', fontWeight: 700, marginBottom: '4px', lineHeight: 1 }}>
+                  156
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '14px', opacity: 0.7 }}>
+                  Events Completed
+                </div>
+                <div style={{ color: '#2C3E50', fontSize: '12px', opacity: 0.6, marginTop: '8px' }}>
+                  Year to Date
+                </div>
+              </div>
+            </div>
+
+            {/* Volunteer Participation Trend - Area Chart */}
+            <div 
+              className="p-8 shadow-lg"
+              style={{ backgroundColor: '#ffffff', borderRadius: '16px' }}
+            >
+              <h2 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '24px', marginBottom: '24px' }}>
+                Volunteer Participation Trend
+              </h2>
+              <ResponsiveContainer width="100%" height={350}>
+                <AreaChart data={participationData}>
+                  <defs>
+                    <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#779F8D" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#779F8D" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorVolunteers" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2C3E50" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#2C3E50" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis 
+                    dataKey="month" 
+                    stroke="#2C3E50"
+                    style={{ fontSize: '14px' }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    stroke="#2C3E50"
+                    style={{ fontSize: '14px' }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: 'none',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="hours" 
+                    stroke="#779F8D" 
+                    strokeWidth={3}
+                    fillOpacity={1} 
+                    fill="url(#colorHours)"
+                    name="Hours"
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="volunteers" 
+                    stroke="#2C3E50" 
+                    strokeWidth={3}
+                    fillOpacity={1} 
+                    fill="url(#colorVolunteers)"
+                    name="Volunteers"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Donation vs Target - Bar Chart */}
+            <div 
+              className="p-8 shadow-lg"
+              style={{ backgroundColor: '#ffffff', borderRadius: '16px' }}
+            >
+              <h2 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '24px', marginBottom: '24px' }}>
+                Fundraising Performance
+              </h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={donationData}>
+                  <XAxis 
+                    dataKey="quarter" 
+                    stroke="#2C3E50"
+                    style={{ fontSize: '14px' }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    stroke="#2C3E50"
+                    style={{ fontSize: '14px' }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: 'none',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="target" 
+                    fill="#E0E0E0" 
+                    radius={[8, 8, 0, 0]}
+                    name="Target"
+                  />
+                  <Bar 
+                    dataKey="actual" 
+                    fill="#779F8D" 
+                    radius={[8, 8, 0, 0]}
+                    name="Actual"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Sidebar - Key Insights - 3 cols */}
+          <div className="col-span-3 space-y-6">
+            {/* Key Insights */}
+            <div 
+              className="p-6 shadow-lg"
+              style={{ backgroundColor: '#ffffff', borderRadius: '16px' }}
+            >
+              <h3 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '20px', marginBottom: '20px' }}>
+                Key Insights
+              </h3>
+
+              <div className="space-y-4">
+                <div 
+                  className="p-4"
+                  style={{ backgroundColor: '#F0F7F4', borderRadius: '12px', borderLeft: '4px solid #779F8D' }}
+                >
+                  <div className="flex items-start gap-3">
+                    <CheckCircle size={20} style={{ color: '#779F8D', flexShrink: 0, marginTop: '2px' }} />
+                    <div>
+                      <div style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>
+                        Retention Up 12%
+                      </div>
+                      <div style={{ color: '#2C3E50', fontSize: '13px', opacity: 0.8 }}>
+                        Volunteer retention has improved significantly this quarter
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div 
+                  className="p-4"
+                  style={{ backgroundColor: '#FFF8E1', borderRadius: '12px', borderLeft: '4px solid #FFB74D' }}
+                >
+                  <div className="flex items-start gap-3">
+                    <AlertCircle size={20} style={{ color: '#FFB74D', flexShrink: 0, marginTop: '2px' }} />
+                    <div>
+                      <div style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>
+                        Q4 Fundraising Below Target
+                      </div>
+                      <div style={{ color: '#2C3E50', fontSize: '13px', opacity: 0.8 }}>
+                        Need $12K more to reach Q4 goal
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div 
+                  className="p-4"
+                  style={{ backgroundColor: '#F0F7F4', borderRadius: '12px', borderLeft: '4px solid #779F8D' }}
+                >
+                  <div className="flex items-start gap-3">
+                    <TrendingUp size={20} style={{ color: '#779F8D', flexShrink: 0, marginTop: '2px' }} />
+                    <div>
+                      <div style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>
+                        Peak Engagement in Sept
+                      </div>
+                      <div style={{ color: '#2C3E50', fontSize: '13px', opacity: 0.8 }}>
+                        68 active volunteers, highest this year
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div 
+                  className="p-4"
+                  style={{ backgroundColor: '#F0F7F4', borderRadius: '12px', borderLeft: '4px solid #779F8D' }}
+                >
+                  <div className="flex items-start gap-3">
+                    <CheckCircle size={20} style={{ color: '#779F8D', flexShrink: 0, marginTop: '2px' }} />
+                    <div>
+                      <div style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>
+                        Events Up 25%
+                      </div>
+                      <div style={{ color: '#2C3E50', fontSize: '13px', opacity: 0.8 }}>
+                        156 events completed vs 125 last year
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Programs */}
+            <div 
+              className="p-6 shadow-lg"
+              style={{ backgroundColor: '#ffffff', borderRadius: '16px' }}
+            >
+              <h3 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '20px', marginBottom: '20px' }}>
+                Top Programs
+              </h3>
+
+              <div className="space-y-4">
+                {[
+                  { name: 'Food Distribution', hours: 1250, color: '#779F8D' },
+                  { name: 'Environmental', hours: 980, color: '#9DBAA9' },
+                  { name: 'Senior Support', hours: 840, color: '#C4D7CC' }
+                ].map((program, index) => (
+                  <div key={program.name}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span style={{ color: '#2C3E50', fontSize: '14px', fontWeight: 600 }}>
+                        {program.name}
+                      </span>
+                      <span style={{ color: '#2C3E50', fontSize: '14px', fontWeight: 700 }}>
+                        {program.hours}h
+                      </span>
+                    </div>
+                    <div 
+                      className="w-full h-2"
+                      style={{ backgroundColor: '#F5F7FA', borderRadius: '100px', overflow: 'hidden' }}
+                    >
+                      <div
+                        className="h-full"
+                        style={{
+                          backgroundColor: program.color,
+                          width: `${(program.hours / 1250) * 100}%`,
+                          borderRadius: '100px'
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div 
+              className="p-6 shadow-lg"
+              style={{ backgroundColor: '#ffffff', borderRadius: '16px' }}
+            >
+              <h3 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '20px', marginBottom: '20px' }}>
+                Quick Actions
+              </h3>
+
+              <div className="space-y-3">
+                <button 
+                  className="w-full p-3 text-left transition-all"
+                  style={{ 
+                    backgroundColor: '#F0F7F4',
+                    borderRadius: '8px',
+                    color: '#2C3E50',
+                    fontWeight: 600
+                  }}
+                >
+                  Export Full Report
+                </button>
+                <button 
+                  className="w-full p-3 text-left transition-all"
+                  style={{ 
+                    backgroundColor: '#F5F7FA',
+                    borderRadius: '8px',
+                    color: '#2C3E50',
+                    fontWeight: 600
+                  }}
+                >
+                  Schedule Meeting
+                </button>
+                <button 
+                  className="w-full p-3 text-left transition-all"
+                  style={{ 
+                    backgroundColor: '#F5F7FA',
+                    borderRadius: '8px',
+                    color: '#2C3E50',
+                    fontWeight: 600
+                  }}
+                >
+                  View All Metrics
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

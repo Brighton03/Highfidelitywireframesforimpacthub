@@ -29,7 +29,7 @@ export function SidebarNavigation({ activeItem = 'Dashboard', onNavigate, userTy
 
   return (
     <aside 
-      className="w-64 h-screen flex flex-col"
+      className="w-64 h-screen flex flex-col shadow-lg"
       style={{ backgroundColor: '#2C3E50' }}
     >
       <div className="p-6 border-b" style={{ borderColor: '#3E5266' }}>
@@ -45,12 +45,14 @@ export function SidebarNavigation({ activeItem = 'Dashboard', onNavigate, userTy
             <button
               key={item.label}
               onClick={() => onNavigate?.(item.label)}
-              className="w-full flex items-center gap-3 px-4 py-3 mb-1 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 mb-2 transition-all"
               style={{
                 backgroundColor: isActive ? '#779F8D' : 'transparent',
                 color: '#FFFFFF',
-                borderRadius: '8px',
-                fontWeight: isActive ? 600 : 400
+                borderRadius: '12px',
+                fontWeight: isActive ? 600 : 400,
+                boxShadow: isActive ? '0 4px 12px rgba(119, 159, 141, 0.3)' : 'none',
+                transform: isActive ? 'translateX(4px)' : 'none'
               }}
             >
               <Icon size={20} />
