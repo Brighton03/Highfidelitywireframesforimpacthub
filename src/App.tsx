@@ -6,9 +6,10 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { RegistrationFlow } from './components/RegistrationFlow';
 import { CreateEventFlow } from './components/CreateEventFlow';
 import { DiscoverJoinFlow } from './components/DiscoverJoinFlow';
+import { VolunteerMobileApp } from './components/VolunteerMobileApp';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'volunteer-web' | 'coordinator' | 'admin' | 'register-flow' | 'create-event-flow' | 'discover-join-flow'>('volunteer-web');
+  const [activeTab, setActiveTab] = useState<'volunteer-web' | 'coordinator' | 'admin' | 'register-flow' | 'create-event-flow' | 'discover-join-flow' | 'volunteer-mobile'>('volunteer-web');
   const [volunteerView, setVolunteerView] = useState<'dashboard' | 'opportunities'>('dashboard');
 
   return (
@@ -62,6 +63,13 @@ export default function App() {
           >
             Discover & Join Flow
           </button>
+          <button
+            onClick={() => setActiveTab('volunteer-mobile')}
+            className={activeTab === 'volunteer-mobile' ? 'text-white' : 'text-white/60'}
+            style={{ fontWeight: activeTab === 'volunteer-mobile' ? 600 : 400 }}
+          >
+            Volunteer Mobile App
+          </button>
         </div>
       </div>
 
@@ -80,6 +88,7 @@ export default function App() {
       {activeTab === 'register-flow' && <RegistrationFlow />}
       {activeTab === 'create-event-flow' && <CreateEventFlow />}
       {activeTab === 'discover-join-flow' && <DiscoverJoinFlow />}
+      {activeTab === 'volunteer-mobile' && <VolunteerMobileApp />}
     </div>
   );
 }

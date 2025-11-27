@@ -1,5 +1,4 @@
 import { Home, Calendar, Users, FileText, Settings, BarChart3, Database, FileBarChart, DollarSign } from 'lucide-react';
-import logoImage from 'figma:asset/dcbb89f1fa36dcc241ee0e27240bc423c0b2908c.png';
 
 interface SidebarNavigationProps {
   activeItem?: string;
