@@ -30,7 +30,7 @@ export function VolunteerDatabase() {
       id: 3,
       name: 'Emma Davis',
       email: 'emma.davis@email.com',
-      skills: ['Medical', 'Server'],
+      skills: ['First Aid', 'Server'],
       hours: 52,
       status: 'Active',
       role: 'Coordinator'

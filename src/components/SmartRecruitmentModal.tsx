@@ -1,12 +1,16 @@
 import { Button } from './Button';
-import { Badge } from './Badge';
-import { X, Target, Clock, Users, MapPin, Award, Plus, CheckCircle2 } from 'lucide-react';
+import { X, Target, Clock, MapPin, Award, Plus, CheckCircle2 } from 'lucide-react';
 
 interface SmartRecruitmentModalProps {
   onClose: () => void;
+  onComplete: (matchedCount: number) => void;
+  eventName: string;
+  eventDate: string;
+  timeRange: string;
+  location: string;
 }
 
-export function SmartRecruitmentModal({ onClose }: SmartRecruitmentModalProps) {
+export function SmartRecruitmentModal({ onClose, onComplete, eventName, eventDate, timeRange, location }: SmartRecruitmentModalProps) {
   const topMatches = [
     {
       id: 1,
@@ -57,7 +61,10 @@ export function SmartRecruitmentModal({ onClose }: SmartRecruitmentModalProps) {
                 Smart Recruitment Scan
               </h2>
               <p style={{ color: '#2C3E50', fontSize: '16px', opacity: 0.8 }}>
-                AI-powered matching for "Weekly Food Delivery" • Friday, 9:00 AM - 12:00 PM
+                AI-powered matching for "{eventName}" • {eventDate} • {timeRange}
+              </p>
+              <p style={{ color: '#2C3E50', fontSize: '14px', opacity: 0.7 }}>
+                Location: {location}
               </p>
             </div>
             <button
@@ -365,7 +372,7 @@ export function SmartRecruitmentModal({ onClose }: SmartRecruitmentModalProps) {
             <Button variant="secondary" onClick={onClose} className="flex-1">
               Cancel
             </Button>
-            <Button variant="primary" className="flex-1">
+            <Button variant="primary" className="flex-1" onClick={() => onComplete(15)}>
               Send Invitations to All 15 Volunteers
             </Button>
           </div>

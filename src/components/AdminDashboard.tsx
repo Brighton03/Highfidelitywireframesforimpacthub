@@ -16,7 +16,7 @@ export function AdminDashboard() {
         userType="admin"
       />
 
-      <main className="flex-1">
+      <main className="flex-1" style={{ backgroundColor: '#F5F7FA' }}>
         {activeView === 'Dashboard' && <AnalyticsDashboard />}
         {activeView === 'Analytics' && <AnalyticsDashboard />}
         {activeView === 'Volunteer Database' && <VolunteerDatabase />}

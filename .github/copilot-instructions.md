@@ -81,8 +81,23 @@ npm run build   # Production build
 The project uses SVG-based logos in different variants:
 - **Black logo** (`#2C3E50`) - Used on white/light backgrounds (TopNavigation, Mobile app header)
 - **White logo** - Used on dark backgrounds (SidebarNavigation with `#2C3E50` background)
-- Logo design: "Impacthub" text with flower icon
+- Logo design: "Impacthub" text with flower icon (simple, clean design without watermark)
 - Always use inline SVG data URIs for consistent rendering across all platforms
+- Logo text uses Georgia/serif font family for brand consistency
+
+### Navigation & User Flow
+- **Top navigation buttons**: All buttons have explicit cursor pointers and proper styling (border: none, background: transparent, padding: 8px 12px)
+- **Flow navigation**: Register Flow, Create Event Flow, Discover & Join Flow, and Mobile App are all accessible from top nav
+- **Volunteer journey**: Dashboard ↔ Opportunity Finder (bidirectional navigation)
+- **Coordinator/Admin**: Accessible via sidebar with role-specific menu items
+
+### Progress Indicators (Stepper UI)
+All multi-step flows use consistent stepper UI with:
+- Background connecting line (grey #E0E0E0)
+- Progress fill line (green #779F8D) showing completion
+- Circular step indicators with numbers/checkmarks
+- No gaps between steps - continuous visual connection
+- Active step highlighted with shadow and brand color
 
 ### Key Dependencies
 - **UI Framework**: React 18 with Vite + SWC
@@ -166,6 +181,36 @@ Match `RegistrationFlow.tsx` pattern:
 - ❌ Adding backend API calls (this is frontend-only)
 - ❌ Creating new styling systems outside the established dual approach
 - ❌ Using custom icons instead of lucide-react
+
+## Business Rules Implementation
+
+The application enforces 4 key business processes with validation logic:
+
+### 1. Register & Onboard Volunteer (RegistrationFlow.tsx)
+- **Unique Identity Verification**: Email uniqueness check against database
+- **OTP Verification**: 6-digit code sent to email, expires after 10 minutes
+- **High-Risk Screening**: Automated flagging for admin review based on background check keywords
+- Implementation: See validation functions in RegistrationFlow component header
+
+### 2. Discover & Join Event (DiscoverJoinFlow.tsx)
+- **Skill-Event Matching**: Filter events by volunteer's registered skills/interests, display match percentage
+- **Schedule Conflict Prevention**: Block overlapping time slots, display "Time Conflict" warnings
+- **Capacity Management**: Real-time spot tracking, waitlist system when full
+- Implementation: See checkSkillMatch(), hasScheduleConflict(), checkAvailability() functions
+
+### 3. Create Event & Recruit Volunteers (CreateEventFlow.tsx)
+- **Role Integrity**: Only Programme Coordinators can create events, admin approval required for >50 capacity
+- **Skill Requirement Specification**: Define required skills, auto-match volunteers, filter by qualification
+- **Smart Recruitment**: Recommend volunteers based on skill match, attendance history, location proximity
+- Implementation: See matchVolunteersToEvent(), getSmartRecommendations() functions
+
+### 4. Generate Impact & Analytics Reports (ReportGenerator.tsx)
+- **Data Privacy & Anonymization**: Public reports show IDs not names, sensitive data removed
+- **Audience-Based Filtering**: Different metrics available for public vs internal reports
+- **Metrics Calculation**: Total hours (approved only), retention rate, impact metrics, demographic breakdown
+- Implementation: See anonymizeData(), exportReport() functions with audience-based logic
+
+All validation is implemented as documented functions showing the logic flow for high-fidelity wireframe purposes.
 
 ## File References
 

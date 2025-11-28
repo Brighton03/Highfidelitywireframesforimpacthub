@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Calendar, Clock, MapPin, Plus, Home, Search, Bell, User, CheckCircle2, Award, Filter, X, ArrowLeft } from 'lucide-react';
 import { Button } from './Button';
 import { Badge } from './Badge';
+import logoImage from '../assets/logo-colored.png';
 
 export function VolunteerMobileApp() {
   const [activeTab, setActiveTab] = useState<'home' | 'opportunities' | 'schedule' | 'log' | 'profile'>('home');
@@ -10,7 +11,14 @@ export function VolunteerMobileApp() {
   const [loggedHours, setLoggedHours] = useState('');
   const [selectedEventForLog, setSelectedEventForLog] = useState('');
   const [logDate, setLogDate] = useState('');
-  const [selectedFilters, setSelectedFilters] = useState<string[]>(['Driver', 'Food']);
+  const [logLocation, setLogLocation] = useState('');
+  const [selectedFilters, setSelectedFilters] = useState<string[]>(['Driver']);
+  const [mobileLogConfirmation, setMobileLogConfirmation] = useState<{
+    eventName: string;
+    date: string;
+    hours: string;
+    location: string;
+  } | null>(null);
 
   const upcomingShifts = [
     { id: 1, title: 'Food Pantry', date: 'Oct 24, 2025', time: '9:00 AM - 12:00 PM', location: 'Community Center', status: 'confirmed' },
@@ -48,7 +56,7 @@ export function VolunteerMobileApp() {
       location: 'Various locations',
       spotsLeft: 12,
       totalSpots: 15,
-      skills: ['Driver', 'Food'],
+      skills: ['Driver'],
       description: 'Help deliver meals to homebound seniors every week.',
       requirements: ['Valid driver license', 'Reliable vehicle'],
       coordinator: 'Michael Chen'
@@ -69,18 +77,55 @@ export function VolunteerMobileApp() {
     }
   ];
 
+  const mobileEventLookup: Record<string, { date: string; hours: string; location: string; name: string }> = {
+    'food-pantry': { date: '2025-10-24', hours: '3', location: 'Community Center', name: 'Food Pantry Assistance' },
+    'beach-cleanup': { date: '2025-11-02', hours: '3', location: 'Main Beach', name: 'Beach Cleanup Crew' },
+    'senior-center': { date: '2025-11-08', hours: '3', location: 'Sunrise Senior Center', name: 'Senior Center Visit' },
+  };
+
   const handleLogHours = () => {
-    // Simulate logging hours
+    if (!selectedEventForLog || !loggedHours || !logDate) return;
+    const metadata = mobileEventLookup[selectedEventForLog];
+    setMobileLogConfirmation({
+      eventName: metadata?.name ?? 'Volunteer Activity',
+      date: logDate,
+      hours: loggedHours,
+      location: logLocation || metadata?.location || 'Pending location'
+    });
     setLoggedHours('');
     setSelectedEventForLog('');
     setLogDate('');
+    setLogLocation('');
+  };
+
+  // Auto-fill for mobile Log Hours upon event selection
+  if (selectedEventForLog && mobileEventLookup[selectedEventForLog]) {
+    // This simple guard ensures values are set after selection; avoid looping by checking existing values
+    if (!logDate || !loggedHours || !logLocation) {
+      const info = mobileEventLookup[selectedEventForLog];
+      if (!logDate) setLogDate(info.date);
+      if (!loggedHours) setLoggedHours(info.hours);
+      if (!logLocation) setLogLocation(info.location);
+    }
+  }
+
+  const filterOpportunity = (opp: typeof opportunities[number]) => {
+    if (!selectedFilters.length) return true;
+    const tags = [
+      opp.type,
+      opp.location,
+      ...opp.skills,
+      ...opp.title.split(' '),
+      ...(opp.description ? opp.description.split(' ') : [])
+    ].map(t => t.toLowerCase());
+    return selectedFilters.some(f => tags.includes(f.toLowerCase()));
   };
 
   return (
     <div className="flex justify-center items-start py-8" style={{ backgroundColor: '#F5F7FA', minHeight: '100vh' }}>
       {/* Mobile Phone Frame */}
       <div 
-        className="relative"
+        className="relative no-scrollbar"
         style={{ 
           width: '375px',
           minHeight: '812px',
@@ -113,22 +158,30 @@ export function VolunteerMobileApp() {
           className="px-4 py-4 flex items-center justify-between"
           style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E0E0E0' }}
         >
-          <div className="flex flex-col">
+          <div className="flex items-center gap-3">
             <img 
-              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1560 480'%3E%3Ctext x='10' y='280' font-family='Georgia, serif' font-size='280' fill='%232C3E50'%3EImpacthub%3C/text%3E%3Cpath d='M1460 80 Q1480 60 1500 80 L1520 180 Q1500 200 1480 180 Z M1490 200 L1490 400' stroke='%232C3E50' stroke-width='8' fill='%232C3E50'/%3E%3C/svg%3E" 
+              src={logoImage} 
               alt="ImpactHub Logo" 
-              style={{ height: '28px', width: 'auto', marginBottom: '4px' }}
+              style={{ height: '32px', width: 'auto' }}
             />
-            <p style={{ color: '#2C3E50', fontSize: '11px', opacity: 0.7 }}>Welcome, Sarah</p>
           </div>
           <Bell size={24} style={{ color: '#2C3E50' }} />
         </div>
 
         {/* Content Area */}
-        <div style={{ height: 'calc(812px - 120px - 70px)', overflowY: 'auto', backgroundColor: '#F5F7FA' }}>
+        <div className="no-scrollbar" style={{ height: 'calc(812px - 120px - 70px)', overflowY: 'auto', backgroundColor: '#F5F7FA' }}>
           {/* HOME TAB */}
           {activeTab === 'home' && (
             <div className="p-4 space-y-4">
+              {/* Greeting */}
+              <div>
+                <h1 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '22px', marginBottom: '4px' }}>
+                  Welcome, Brighton!
+                </h1>
+                <p style={{ color: '#2C3E50', fontSize: '14px', opacity: 0.85 }}>
+                  You’ve got this — thanks for volunteering today.
+                </p>
+              </div>
               {/* Progress Card */}
               <div 
                 className="p-4"
@@ -139,14 +192,14 @@ export function VolunteerMobileApp() {
                     <Award size={20} style={{ color: '#779F8D' }} />
                     <span style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px' }}>Silver Rank</span>
                   </div>
-                  <span style={{ color: '#2C3E50', fontSize: '12px' }}>12/20 hrs to Gold</span>
+                  <span style={{ color: '#2C3E50', fontSize: '12px' }}>20/45 hours to Gold</span>
                 </div>
                 <div className="w-full h-2" style={{ backgroundColor: '#E0E0E0', borderRadius: '100px', overflow: 'hidden' }}>
                   <div 
                     className="h-full"
                     style={{ 
                       backgroundColor: '#779F8D', 
-                      width: '60%',
+                      width: '44%',
                       borderRadius: '100px'
                     }}
                   />
@@ -279,7 +332,7 @@ export function VolunteerMobileApp() {
                     <div>
                       <p style={{ color: '#2C3E50', fontWeight: 600, fontSize: '12px', marginBottom: '8px' }}>Skills</p>
                       <div className="flex flex-wrap gap-2">
-                        {['Driver', 'Teacher', 'Medical', 'Server'].map((skill) => (
+                        {['Driver', 'Teacher', 'Server'].map((skill) => (
                           <button
                             key={skill}
                             onClick={() => {
@@ -332,7 +385,7 @@ export function VolunteerMobileApp() {
 
               {/* Opportunities List */}
               <div className="space-y-3">
-                {opportunities.map((opp) => (
+                {opportunities.filter(filterOpportunity).map((opp) => (
                   <div
                     key={opp.id}
                     onClick={() => setSelectedEvent(opp.id)}
@@ -561,106 +614,251 @@ export function VolunteerMobileApp() {
           {/* LOG HOURS TAB */}
           {activeTab === 'log' && (
             <div className="p-4 space-y-4">
-              <div 
-                className="p-4"
-                style={{ backgroundColor: '#FFFFFF', borderRadius: '12px' }}
-              >
-                <h2 style={{ color: '#2C3E50', fontWeight: 600, fontSize: '18px', marginBottom: '16px' }}>
-                  Log Volunteer Hours
-                </h2>
+              {mobileLogConfirmation && (
+                <div
+                  className="p-4"
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    border: '1px solid #E0E0E0',
+                    boxShadow: '0 12px 30px rgba(44, 62, 80, 0.08)'
+                  }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 flex items-center justify-center"
+                        style={{ backgroundColor: '#F0F7F4', borderRadius: '50%' }}
+                      >
+                        <CheckCircle2 size={22} color="#779F8D" />
+                      </div>
+                      <div>
+                        <p style={{ color: '#2C3E50', fontWeight: 700, fontSize: '16px', marginBottom: '2px' }}>
+                          Hours Submitted
+                        </p>
+                        <p style={{ color: '#2C3E50', fontSize: '12px' }}>
+                          Waiting for coordinator approval. We will notify you soon.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setMobileLogConfirmation(null)}
+                      style={{ border: 'none', backgroundColor: 'transparent', cursor: 'pointer' }}
+                    >
+                      <X size={16} style={{ color: '#2C3E50' }} />
+                    </button>
+                  </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '8px', display: 'block' }}>
-                      Select Event
-                    </label>
-                    <select
-                      value={selectedEventForLog}
-                      onChange={(e) => setSelectedEventForLog(e.target.value)}
-                      className="w-full px-3 py-3 border"
+                  <div className="mt-4 space-y-3">
+                    <div>
+                      <p style={{ color: '#9E9E9E', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        Event
+                      </p>
+                      <p style={{ color: '#2C3E50', fontWeight: 600 }}>{mobileLogConfirmation.eventName}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p style={{ color: '#9E9E9E', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                          Date
+                        </p>
+                        <div className="flex items-center gap-2" style={{ color: '#2C3E50', fontWeight: 600 }}>
+                          <Calendar size={14} />
+                          {mobileLogConfirmation.date}
+                        </div>
+                      </div>
+                      <div>
+                        <p style={{ color: '#9E9E9E', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                          Hours
+                        </p>
+                        <div className="flex items-center gap-2" style={{ color: '#2C3E50', fontWeight: 600 }}>
+                          <Clock size={14} />
+                          {mobileLogConfirmation.hours} hrs
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <p style={{ color: '#9E9E9E', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        Location
+                      </p>
+                      <div className="flex items-center gap-2" style={{ color: '#2C3E50', fontWeight: 600 }}>
+                        <MapPin size={14} />
+                        {mobileLogConfirmation.location}
+                      </div>
+                    </div>
+                    <div
+                      className="p-3"
+                      style={{ backgroundColor: '#F0F7F4', borderRadius: '8px', border: '1px solid #CDE2D6', fontSize: '12px', color: '#2C3E50' }}
+                    >
+                      Keep this confirmation until your coordinator approves the submission.
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    <button
+                      onClick={() => setMobileLogConfirmation(null)}
                       style={{
-                        borderColor: '#E0E0E0',
                         borderRadius: '8px',
+                        border: '1px solid #779F8D',
                         backgroundColor: '#FFFFFF',
-                        color: '#2C3E50',
-                        fontSize: '14px'
+                        color: '#779F8D',
+                        fontWeight: 600,
+                        padding: '10px 0',
+                        cursor: 'pointer'
                       }}
                     >
-                      <option value="">Choose an event...</option>
-                      <option value="food-pantry">Food Pantry - Oct 24</option>
-                      <option value="beach-cleanup">Beach Cleanup - Nov 2</option>
-                      <option value="senior-center">Senior Center - Nov 8</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '8px', display: 'block' }}>
-                      Date
-                    </label>
-                    <input
-                      type="date"
-                      value={logDate}
-                      onChange={(e) => setLogDate(e.target.value)}
-                      className="w-full px-3 py-3 border"
-                      style={{
-                        borderColor: '#E0E0E0',
-                        borderRadius: '8px',
-                        backgroundColor: '#FFFFFF',
-                        color: '#2C3E50',
-                        fontSize: '14px'
+                      Close
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMobileLogConfirmation(null);
+                        setSelectedEventForLog('');
                       }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '8px', display: 'block' }}>
-                      Hours Volunteered
-                    </label>
-                    <input
-                      type="number"
-                      value={loggedHours}
-                      onChange={(e) => setLoggedHours(e.target.value)}
-                      placeholder="Enter hours (e.g., 3.5)"
-                      className="w-full px-3 py-3 border"
                       style={{
-                        borderColor: '#E0E0E0',
                         borderRadius: '8px',
-                        backgroundColor: '#FFFFFF',
-                        color: '#2C3E50',
-                        fontSize: '14px'
+                        border: 'none',
+                        backgroundColor: '#779F8D',
+                        color: '#FFFFFF',
+                        fontWeight: 600,
+                        padding: '10px 0',
+                        cursor: 'pointer'
                       }}
-                    />
+                    >
+                      Log Another
+                    </button>
                   </div>
-
-                  <div>
-                    <label style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '8px', display: 'block' }}>
-                      Notes (Optional)
-                    </label>
-                    <textarea
-                      placeholder="Add any notes about your volunteer work..."
-                      rows={4}
-                      className="w-full px-3 py-3 border"
-                      style={{
-                        borderColor: '#E0E0E0',
-                        borderRadius: '8px',
-                        backgroundColor: '#FFFFFF',
-                        color: '#2C3E50',
-                        fontSize: '14px',
-                        resize: 'none'
-                      }}
-                    />
-                  </div>
-
-                  <Button 
-                    onClick={handleLogHours}
-                    disabled={!selectedEventForLog || !loggedHours || !logDate}
-                    className="w-full"
-                  >
-                    <CheckCircle2 size={16} />
-                    Submit Hours
-                  </Button>
                 </div>
-              </div>
+              )}
+
+              {!mobileLogConfirmation && (
+                <div 
+                  className="p-4"
+                  style={{ backgroundColor: '#FFFFFF', borderRadius: '12px' }}
+                >
+                  <h2 style={{ color: '#2C3E50', fontWeight: 600, fontSize: '18px', marginBottom: '16px' }}>
+                    Log Volunteer Hours
+                  </h2>
+
+                  <div className="space-y-4">
+                    {/* Event select always visible */}
+                    <div>
+                      <label style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '8px', display: 'block' }}>
+                        Select Event
+                      </label>
+                      <select
+                        value={selectedEventForLog}
+                        onChange={(e) => {
+                          setSelectedEventForLog(e.target.value);
+                        }}
+                        className="w-full px-3 py-3 border"
+                        style={{
+                          borderColor: '#E0E0E0',
+                          borderRadius: '8px',
+                          backgroundColor: '#FFFFFF',
+                          color: '#2C3E50',
+                          fontSize: '14px'
+                        }}
+                      >
+                        <option value="">Choose an event...</option>
+                        <option value="food-pantry">Food Pantry - Oct 24</option>
+                        <option value="beach-cleanup">Beach Cleanup - Nov 2</option>
+                        <option value="senior-center">Senior Center - Nov 8</option>
+                      </select>
+                    </div>
+
+                    {/* Reveal rest only after event selected */}
+                    {selectedEventForLog && (
+                      <>
+                        <div>
+                          <label style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '8px', display: 'block' }}>
+                            Date
+                          </label>
+                          <input
+                            type="date"
+                            value={logDate}
+                            onChange={(e) => setLogDate(e.target.value)}
+                            className="w-full px-3 py-3 border"
+                            style={{
+                              borderColor: '#E0E0E0',
+                              borderRadius: '8px',
+                              backgroundColor: '#FFFFFF',
+                              color: '#2C3E50',
+                              fontSize: '14px'
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '8px', display: 'block' }}>
+                            Hours Volunteered
+                          </label>
+                          <input
+                            type="number"
+                            value={loggedHours}
+                            onChange={(e) => setLoggedHours(e.target.value)}
+                            placeholder="Enter hours (e.g., 3.5)"
+                            className="w-full px-3 py-3 border"
+                            style={{
+                              borderColor: '#E0E0E0',
+                              borderRadius: '8px',
+                              backgroundColor: '#FFFFFF',
+                              color: '#2C3E50',
+                              fontSize: '14px'
+                            }}
+                          />
+                        </div>
+
+                        {/* Optional location display for confirmation */}
+                        <div>
+                          <label style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '8px', display: 'block' }}>
+                            Location
+                          </label>
+                          <input
+                            type="text"
+                            value={logLocation}
+                            onChange={(e) => setLogLocation(e.target.value)}
+                            className="w-full px-3 py-3 border"
+                            style={{
+                              borderColor: '#E0E0E0',
+                              borderRadius: '8px',
+                              backgroundColor: '#FFFFFF',
+                              color: '#2C3E50',
+                              fontSize: '14px'
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ color: '#2C3E50', fontWeight: 600, fontSize: '14px', marginBottom: '8px', display: 'block' }}>
+                            Notes (Optional)
+                          </label>
+                          <textarea
+                            placeholder="Add any notes about your volunteer work..."
+                            rows={4}
+                            className="w-full px-3 py-3 border"
+                            style={{
+                              borderColor: '#E0E0E0',
+                              borderRadius: '8px',
+                              backgroundColor: '#FFFFFF',
+                              color: '#2C3E50',
+                              fontSize: '14px',
+                              resize: 'none'
+                            }}
+                          />
+                        </div>
+
+                        <Button 
+                          onClick={handleLogHours}
+                          disabled={!selectedEventForLog || !loggedHours || !logDate}
+                          className="w-full"
+                        >
+                          <CheckCircle2 size={16} />
+                          Submit Hours
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Recent Logs */}
               <div 

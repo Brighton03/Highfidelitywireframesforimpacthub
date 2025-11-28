@@ -3,9 +3,15 @@ import { CheckCircle2, Calendar, X } from 'lucide-react';
 
 interface BookingConfirmationModalProps {
   onClose: () => void;
+  heading?: string;
+  joinedEntries?: string[];
+  waitlistedEntries?: string[];
 }
 
-export function BookingConfirmationModal({ onClose }: BookingConfirmationModalProps) {
+export function BookingConfirmationModal({ onClose, heading = 'Booking Update', joinedEntries = [], waitlistedEntries = [] }: BookingConfirmationModalProps) {
+  const hasJoined = joinedEntries.length > 0;
+  const hasWaitlist = waitlistedEntries.length > 0;
+
   return (
     <div 
       className="fixed inset-0 flex items-center justify-center"
@@ -24,58 +30,64 @@ export function BookingConfirmationModal({ onClose }: BookingConfirmationModalPr
               <CheckCircle2 size={28} color="#FFFFFF" />
             </div>
             <h2 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '24px' }}>
-              Registration Complete
+              Selections Saved
             </h2>
           </div>
-          <button onClick={onClose} style={{ color: '#2C3E50' }}>
+          <button onClick={onClose} style={{ color: '#2C3E50' }} aria-label="Close confirmation dialog">
             <X size={24} />
           </button>
         </div>
 
         <p style={{ color: '#2C3E50', marginBottom: '24px' }}>
-          Your volunteer registration has been processed. Here's a summary:
+          We updated your availability for <strong>{heading}</strong>.
         </p>
 
         {/* Split List Logic */}
         <div className="space-y-4 mb-6">
-          {/* Successfully Joined */}
-          <div 
-            className="p-4 border-l-4"
-            style={{ 
-              backgroundColor: '#F0F7F4',
-              borderColor: '#779F8D',
-              borderRadius: '4px'
-            }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 size={20} style={{ color: '#779F8D' }} />
-              <span style={{ color: '#2C3E50', fontWeight: 600 }}>Successfully Joined</span>
+          {hasJoined && (
+            <div 
+              className="p-4 border-l-4"
+              style={{ 
+                backgroundColor: '#F0F7F4',
+                borderColor: '#779F8D',
+                borderRadius: '4px'
+              }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle2 size={20} style={{ color: '#779F8D' }} />
+                <span style={{ color: '#2C3E50', fontWeight: 600 }}>Added to Upcoming Shifts</span>
+              </div>
+              <ul className="ml-7 space-y-1">
+                {joinedEntries.map((entry) => (
+                  <li key={entry} style={{ color: '#2C3E50', fontSize: '14px' }}>• {entry}</li>
+                ))}
+              </ul>
             </div>
-            <ul className="ml-7 space-y-1">
-              <li style={{ color: '#2C3E50', fontSize: '14px' }}>• Oct 24, 2025 - 9:00 AM - 12:00 PM</li>
-            </ul>
-          </div>
+          )}
 
-          {/* Added to Waitlist */}
-          <div 
-            className="p-4 border-l-4"
-            style={{ 
-              backgroundColor: '#FFF8E1',
-              borderColor: '#FFB74D',
-              borderRadius: '4px'
-            }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar size={20} style={{ color: '#FFB74D' }} />
-              <span style={{ color: '#2C3E50', fontWeight: 600 }}>Added to Waitlist</span>
+          {hasWaitlist && (
+            <div 
+              className="p-4 border-l-4"
+              style={{ 
+                backgroundColor: '#FFF8E1',
+                borderColor: '#FFB74D',
+                borderRadius: '4px'
+              }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar size={20} style={{ color: '#FFB74D' }} />
+                <span style={{ color: '#2C3E50', fontWeight: 600 }}>Waitlist Confirmed</span>
+              </div>
+              <ul className="ml-7 space-y-1">
+                {waitlistedEntries.map((entry) => (
+                  <li key={entry} style={{ color: '#2C3E50', fontSize: '14px' }}>• {entry}</li>
+                ))}
+              </ul>
+              <p style={{ color: '#2C3E50', fontSize: '14px', marginTop: '8px', marginLeft: '28px' }}>
+                We'll notify you if a confirmed spot opens up.
+              </p>
             </div>
-            <ul className="ml-7 space-y-1">
-              <li style={{ color: '#2C3E50', fontSize: '14px' }}>• Nov 14, 2025 - 9:00 AM - 12:00 PM (Shift Full)</li>
-            </ul>
-            <p style={{ color: '#2C3E50', fontSize: '14px', marginTop: '8px', marginLeft: '28px' }}>
-              You'll be notified if a spot opens up.
-            </p>
-          </div>
+          )}
         </div>
 
         {/* Actions */}

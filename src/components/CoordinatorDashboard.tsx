@@ -1,33 +1,63 @@
 import { useState } from 'react';
 import { SidebarNavigation } from './SidebarNavigation';
-import { EventCreationWizard } from './EventCreationWizard';
-import { ShiftScheduler } from './ShiftScheduler';
+import { EventManager } from './EventManager';
 import { HourApprovalQueue } from './HourApprovalQueue';
 import { SmartRecruitmentModal } from './SmartRecruitmentModal';
+import { CoordinatorSettings } from './CoordinatorSettings';
 import { Button } from './Button';
 import { Badge } from './Badge';
-import { Calendar, Users, Clock, MapPin, AlertTriangle, TrendingUp, CheckCircle } from 'lucide-react';
+import { Calendar, Users, Clock, MapPin, AlertTriangle, TrendingUp, CheckCircle, Plus } from 'lucide-react';
+import { CreateEventFlow } from './CreateEventFlow';
+import { UrgentRecruitmentCompletion } from './UrgentRecruitmentCompletion';
+
+interface UrgentNeed {
+  id: number;
+  event: string;
+  date: string;
+  time: string;
+  needed: number;
+  filled: number;
+  severity: 'critical' | 'warning';
+  location: string;
+}
+
+interface RecruitmentSummary {
+  eventName: string;
+  date: string;
+  time: string;
+  location: string;
+  matchedVolunteers: number;
+  coveragePercent: number;
+  remainingGap: number;
+}
 
 export function CoordinatorDashboard() {
   const [activeView, setActiveView] = useState('Dashboard');
   const [showRecruitmentModal, setShowRecruitmentModal] = useState(false);
+  const [selectedUrgentNeed, setSelectedUrgentNeed] = useState<UrgentNeed | null>(null);
+  const [showRecruitmentComplete, setShowRecruitmentComplete] = useState(false);
+  const [recruitmentSummary, setRecruitmentSummary] = useState<RecruitmentSummary | null>(null);
 
-  const urgentNeeds = [
+  const urgentNeeds: UrgentNeed[] = [
     {
       id: 1,
       event: 'Weekend Food Bank',
       date: 'Nov 2, 2025',
+      time: '9:00 AM - 12:00 PM',
       needed: 5,
       filled: 2,
-      severity: 'critical'
+      severity: 'critical',
+      location: 'Community Hub Warehouse'
     },
     {
       id: 2,
-      event: 'Medical Transport',
+      event: 'Safety Officer',
       date: 'Nov 5, 2025',
+      time: '6:00 PM - 10:00 PM',
       needed: 3,
       filled: 1,
-      severity: 'warning'
+      severity: 'warning',
+      location: 'Harborview Arena'
     }
   ];
 
@@ -105,6 +135,36 @@ export function CoordinatorDashboard() {
     return (volunteers / capacity) * 100;
   };
 
+  const handleRecruitmentComplete = (matchedCount: number) => {
+    if (!selectedUrgentNeed) return;
+    const totalFilled = Math.min(selectedUrgentNeed.needed, selectedUrgentNeed.filled + matchedCount);
+    const coveragePercent = Math.round((totalFilled / selectedUrgentNeed.needed) * 100);
+
+    setRecruitmentSummary({
+      eventName: selectedUrgentNeed.event,
+      date: selectedUrgentNeed.date,
+      time: selectedUrgentNeed.time,
+      location: selectedUrgentNeed.location,
+      matchedVolunteers: matchedCount,
+      coveragePercent,
+      remainingGap: Math.max(0, selectedUrgentNeed.needed - totalFilled)
+    });
+
+    setShowRecruitmentModal(false);
+    setShowRecruitmentComplete(true);
+  };
+
+  const closeRecruitmentSummary = () => {
+    setShowRecruitmentComplete(false);
+    setRecruitmentSummary(null);
+    setSelectedUrgentNeed(null);
+  };
+
+  const viewRosterFromSummary = () => {
+    setActiveView('Events');
+    closeRecruitmentSummary();
+  };
+
   if (activeView === 'Events') {
     return (
       <div className="flex min-h-screen" style={{ backgroundColor: '#F5F7FA' }}>
@@ -113,8 +173,24 @@ export function CoordinatorDashboard() {
           onNavigate={setActiveView}
           userType="coordinator"
         />
-        <main className="flex-1">
-          <EventCreationWizard />
+        <main className="flex-1" style={{ backgroundColor: '#F5F7FA' }}>
+          {/* Show events overview scheduler instead of create-new by default */}
+          <EventManager />
+        </main>
+      </div>
+    );
+  }
+
+  if (activeView === 'Create Event') {
+    return (
+      <div className="flex min-h-screen" style={{ backgroundColor: '#F5F7FA' }}>
+        <SidebarNavigation
+          activeItem="Events"
+          onNavigate={setActiveView}
+          userType="coordinator"
+        />
+        <main className="flex-1" style={{ backgroundColor: '#F5F7FA' }}>
+          <CreateEventFlow onBackToManager={() => setActiveView('Events')} />
         </main>
       </div>
     );
@@ -135,6 +211,21 @@ export function CoordinatorDashboard() {
     );
   }
 
+  if (activeView === 'Settings') {
+    return (
+      <div className="flex min-h-screen" style={{ backgroundColor: '#F5F7FA' }}>
+        <SidebarNavigation
+          activeItem="Settings"
+          onNavigate={setActiveView}
+          userType="coordinator"
+        />
+        <main className="flex-1">
+          <CoordinatorSettings />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: '#F5F7FA' }}>
       <SidebarNavigation
@@ -144,6 +235,26 @@ export function CoordinatorDashboard() {
       />
 
       <main className="flex-1">
+        {showRecruitmentModal && selectedUrgentNeed && (
+          <SmartRecruitmentModal
+            onClose={() => {
+              setShowRecruitmentModal(false);
+              setSelectedUrgentNeed(null);
+            }}
+            onComplete={handleRecruitmentComplete}
+            eventName={selectedUrgentNeed.event}
+            eventDate={selectedUrgentNeed.date}
+            timeRange={selectedUrgentNeed.time}
+            location={selectedUrgentNeed.location}
+          />
+        )}
+        {showRecruitmentComplete && recruitmentSummary && (
+          <UrgentRecruitmentCompletion
+            summary={recruitmentSummary}
+            onClose={closeRecruitmentSummary}
+            onViewRoster={viewRosterFromSummary}
+          />
+        )}
         {/* URGENT NEEDS ALERT BANNER */}
         {urgentNeeds.length > 0 && (
           <div 
@@ -197,7 +308,10 @@ export function CoordinatorDashboard() {
                     </div>
                     <Button 
                       variant="primary"
-                      onClick={() => setShowRecruitmentModal(true)}
+                      onClick={() => {
+                        setSelectedUrgentNeed(need);
+                        setShowRecruitmentModal(true);
+                      }}
                       style={{ whiteSpace: 'nowrap' }}
                     >
                       Find Volunteers
@@ -311,12 +425,15 @@ export function CoordinatorDashboard() {
                 <h2 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '24px' }}>
                   Active Event Rosters
                 </h2>
-                <Button variant="primary" onClick={() => setActiveView('Events')}>
-                  Create New Event
+                <Button variant="primary" onClick={() => setActiveView('Create Event')}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Plus size={20} />
+                    <span>Create New Event</span>
+                  </div>
                 </Button>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-3 gap-6">
                 {activeRosters.map((roster) => {
                   const percentage = getProgressPercentage(roster.volunteers, roster.capacity);
                   const statusColor = getStatusColor(roster.status);
@@ -324,92 +441,83 @@ export function CoordinatorDashboard() {
                   return (
                     <div
                       key={roster.id}
-                      className="p-6 shadow-lg"
+                      className="p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer"
                       style={{ 
                         backgroundColor: '#ffffff',
                         borderRadius: '16px',
-                        borderLeft: `6px solid ${statusColor}`
+                        borderTop: `4px solid ${statusColor}`,
+                        minHeight: '240px',
+                        display: 'flex',
+                        flexDirection: 'column'
                       }}
                     >
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '20px', marginBottom: '4px' }}>
+                      <div className="flex-1">
+                        <div className="mb-4">
+                          <h3 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '18px', marginBottom: '8px' }}>
                             {roster.event}
                           </h3>
-                          <div className="flex items-center gap-2">
-                            <Calendar size={16} style={{ color: '#2C3E50', opacity: 0.6 }} />
-                            <span style={{ color: '#2C3E50', fontSize: '14px' }}>{roster.date}</span>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Calendar size={14} style={{ color: '#2C3E50', opacity: 0.6 }} />
+                            <span style={{ color: '#2C3E50', fontSize: '13px' }}>{roster.date}</span>
+                          </div>
+                          <Badge 
+                            variant={
+                              roster.status === 'critical' ? 'error' :
+                              roster.status === 'warning' ? 'warning' :
+                              'success'
+                            }
+                          >
+                            {roster.status === 'excellent' ? 'Full' :
+                             roster.status === 'good' ? 'On Track' :
+                             roster.status === 'warning' ? 'Need More' :
+                             'Urgent'}
+                          </Badge>
+                        </div>
+
+                        {/* Visual Progress */}
+                        <div className="mb-4">
+                          <div className="text-center mb-2">
+                            <span style={{ color: '#2C3E50', fontSize: '24px', fontWeight: 700 }}>
+                              {roster.volunteers}
+                            </span>
+                            <span style={{ color: '#2C3E50', fontSize: '14px', opacity: 0.6 }}>
+                              {' / '}{roster.capacity}
+                            </span>
+                          </div>
+                          <div 
+                            className="w-full h-3"
+                            style={{ 
+                              backgroundColor: '#F5F7FA',
+                              borderRadius: '100px',
+                              overflow: 'hidden'
+                            }}
+                          >
+                            <div
+                              className="h-full transition-all"
+                              style={{
+                                backgroundColor: statusColor,
+                                width: `${percentage}%`,
+                                borderRadius: '100px'
+                              }}
+                            />
                           </div>
                         </div>
-                        <Badge 
-                          variant={
-                            roster.status === 'critical' ? 'error' :
-                            roster.status === 'warning' ? 'warning' :
-                            'success'
-                          }
-                        >
-                          {roster.status === 'excellent' ? 'Full Capacity' :
-                           roster.status === 'good' ? 'On Track' :
-                           roster.status === 'warning' ? 'Need More' :
-                           'Urgent'}
-                        </Badge>
                       </div>
 
-                      {/* Visual Progress Bar */}
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <span style={{ color: '#2C3E50', fontSize: '14px', fontWeight: 600 }}>
-                            Volunteer Coverage
-                          </span>
-                          <span style={{ color: '#2C3E50', fontSize: '14px', fontWeight: 700 }}>
-                            {roster.volunteers} / {roster.capacity}
-                          </span>
-                        </div>
-                        <div 
-                          className="w-full h-4"
-                          style={{ 
-                            backgroundColor: '#F5F7FA',
-                            borderRadius: '100px',
-                            overflow: 'hidden',
-                            position: 'relative'
-                          }}
-                        >
-                          <div
-                            className="h-full transition-all"
-                            style={{
-                              backgroundColor: statusColor,
-                              width: `${percentage}%`,
-                              borderRadius: '100px'
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2 mt-4">
-                        <button 
-                          onClick={() => setShowRecruitmentModal(true)}
-                          className="flex-1 py-2 transition-all"
-                          style={{ 
-                            backgroundColor: '#F0F7F4',
-                            color: '#779F8D',
-                            borderRadius: '8px',
-                            fontWeight: 600
-                          }}
-                        >
-                          Find Volunteers
-                        </button>
-                        <button 
-                          className="flex-1 py-2 transition-all"
-                          style={{ 
-                            backgroundColor: '#F5F7FA',
-                            color: '#2C3E50',
-                            borderRadius: '8px',
-                            fontWeight: 600
-                          }}
-                        >
-                          View Details
-                        </button>
-                      </div>
+                      <button 
+                        onClick={() => setShowRecruitmentModal(true)}
+                        className="w-full py-2 transition-all"
+                        style={{ 
+                          backgroundColor: '#779F8D',
+                          color: '#FFFFFF',
+                          borderRadius: '8px',
+                          fontWeight: 600,
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Find Volunteers
+                      </button>
                     </div>
                   );
                 })}
@@ -472,9 +580,6 @@ export function CoordinatorDashboard() {
         </div>
       </main>
 
-      {showRecruitmentModal && (
-        <SmartRecruitmentModal onClose={() => setShowRecruitmentModal(false)} />
-      )}
     </div>
   );
 }

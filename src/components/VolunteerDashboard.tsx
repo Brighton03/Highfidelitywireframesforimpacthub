@@ -2,15 +2,19 @@ import { useState } from 'react';
 import { TopNavigation } from './TopNavigation';
 import { Button } from './Button';
 import { Badge } from './Badge';
-import { HourLoggingForm } from './HourLoggingForm';
+import { HourLoggingForm, HourLogSubmissionSummary } from './HourLoggingForm';
+import { HourLoggingConfirmation } from './HourLoggingConfirmation';
 import { Calendar, Clock, MapPin, Users, Award, Star, TrendingUp, Heart, Trophy } from 'lucide-react';
 
 interface VolunteerDashboardProps {
   onNavigateToOpportunities: () => void;
+  onNavigate?: (item: string) => void;
+  onLogout?: () => void;
 }
 
-export function VolunteerDashboard({ onNavigateToOpportunities }: VolunteerDashboardProps) {
+export function VolunteerDashboard({ onNavigateToOpportunities, onNavigate, onLogout }: VolunteerDashboardProps) {
   const [showHourLogging, setShowHourLogging] = useState(false);
+  const [hourLogConfirmation, setHourLogConfirmation] = useState<HourLogSubmissionSummary | null>(null);
 
   const upcomingShifts = [
     {
@@ -58,13 +62,13 @@ export function VolunteerDashboard({ onNavigateToOpportunities }: VolunteerDashb
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F5F7FA' }}>
-      <TopNavigation userName="Alex Martinez" />
+      <TopNavigation activeItem="Home" onNavigate={onNavigate} onLogout={onLogout} />
 
       <div className="max-w-[1440px] mx-auto px-8 py-12">
         {/* Welcome Section */}
         <div className="mb-12">
           <h1 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '40px', marginBottom: '8px' }}>
-            Welcome back, Alex! 👋
+            Welcome back, Brighton!
           </h1>
           <p style={{ color: '#2C3E50', fontSize: '18px', opacity: 0.8 }}>
             You're making a real difference in your community
@@ -286,7 +290,7 @@ export function VolunteerDashboard({ onNavigateToOpportunities }: VolunteerDashb
                 <h2 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '24px' }}>
                   Upcoming Shifts
                 </h2>
-                <Button variant="primary" onClick={() => setShowHourLogging(false)}>
+                <Button variant="primary" onClick={() => setShowHourLogging(true)}>
                   Log Hours
                 </Button>
               </div>
@@ -471,8 +475,20 @@ export function VolunteerDashboard({ onNavigateToOpportunities }: VolunteerDashb
       {showHourLogging && (
         <HourLoggingForm 
           onClose={() => setShowHourLogging(false)}
-          onSubmit={() => {
+          onSubmit={(summary) => {
             setShowHourLogging(false);
+            setHourLogConfirmation(summary);
+          }}
+        />
+      )}
+
+      {hourLogConfirmation && (
+        <HourLoggingConfirmation
+          summary={hourLogConfirmation}
+          onClose={() => setHourLogConfirmation(null)}
+          onLogAnother={() => {
+            setHourLogConfirmation(null);
+            setShowHourLogging(true);
           }}
         />
       )}

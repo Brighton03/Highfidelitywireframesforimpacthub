@@ -1,9 +1,13 @@
+import { LogOut } from 'lucide-react';
+import logoImage from '../assets/logo-grayscale.png';
+
 interface TopNavigationProps {
   activeItem?: string;
   onNavigate?: (item: string) => void;
+  onLogout?: () => void;
 }
 
-export function TopNavigation({ activeItem = 'Home', onNavigate }: TopNavigationProps) {
+export function TopNavigation({ activeItem = 'Home', onNavigate, onLogout }: TopNavigationProps) {
   const navItems = ['Home', 'Find Opportunities', 'My Schedule', 'Profile'];
 
   return (
@@ -11,7 +15,7 @@ export function TopNavigation({ activeItem = 'Home', onNavigate }: TopNavigation
       <div className="max-w-[1440px] mx-auto px-8 flex items-center justify-between h-16">
         <div className="flex items-center">
           <img 
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1560 480'%3E%3Ctext x='10' y='280' font-family='Georgia, serif' font-size='280' fill='%232C3E50'%3EImpacthub%3C/text%3E%3Cpath d='M1460 80 Q1480 60 1500 80 L1520 180 Q1500 200 1480 180 Z M1490 200 L1490 400' stroke='%232C3E50' stroke-width='8' fill='%232C3E50'/%3E%3C/svg%3E" 
+            src={logoImage} 
             alt="ImpactHub" 
             className="h-10" 
           />
@@ -25,7 +29,10 @@ export function TopNavigation({ activeItem = 'Home', onNavigate }: TopNavigation
               className="relative py-2"
               style={{
                 color: activeItem === item ? '#779F8D' : '#2C3E50',
-                fontWeight: activeItem === item ? 600 : 400
+                fontWeight: activeItem === item ? 600 : 400,
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer'
               }}
             >
               {item}
@@ -37,6 +44,21 @@ export function TopNavigation({ activeItem = 'Home', onNavigate }: TopNavigation
               )}
             </button>
           ))}
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-2 px-4 py-2 transition-colors hover:bg-opacity-80"
+            style={{ 
+              backgroundColor: '#E57373',
+              color: '#FFFFFF',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 600
+            }}
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
         </div>
       </div>
     </nav>

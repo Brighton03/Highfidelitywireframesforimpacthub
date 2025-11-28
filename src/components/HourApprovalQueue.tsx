@@ -1,8 +1,33 @@
+import { useState } from 'react';
 import { Badge } from './Badge';
-import { Check, X, Edit, AlertTriangle, MapPin } from 'lucide-react';
+import { Check, X, Edit, AlertTriangle } from 'lucide-react';
+import { HourApprovalSuccess } from './HourApprovalSuccess';
+
+interface PendingApproval {
+  id: number;
+  volunteer: string;
+  event: string;
+  date: string;
+  hours: number;
+  location: string;
+  status: 'overdue' | 'normal';
+  flagged: boolean;
+}
 
 export function HourApprovalQueue() {
-  const pendingApprovals = [
+  const [successApproval, setSuccessApproval] = useState<PendingApproval | null>(null);
+
+  const pendingApprovals: PendingApproval[] = [
+    {
+      id: 2,
+      volunteer: 'Michael Johnson',
+      event: 'Beach Cleanup',
+      date: 'Oct 20, 2025',
+      hours: 4.5,
+      location: 'Main Beach',
+      status: 'overdue',
+      flagged: true
+    },
     {
       id: 1,
       volunteer: 'Sarah Chen',
@@ -12,17 +37,6 @@ export function HourApprovalQueue() {
       location: 'Community Center',
       status: 'normal',
       flagged: false
-    },
-    {
-      id: 2,
-      volunteer: 'Michael Johnson',
-      event: 'Beach Cleanup',
-      date: 'Oct 26, 2025',
-      hours: 4.5,
-      location: 'Main Beach (Reported)',
-      actualLocation: 'City Park',
-      status: 'geo-mismatch',
-      flagged: true
     },
     {
       id: 3,
@@ -107,19 +121,13 @@ export function HourApprovalQueue() {
                   <td className="py-3 px-4">
                     <div style={{ color: '#2C3E50' }}>
                       {approval.location}
-                      {approval.flagged && (
-                        <div className="flex items-center gap-1 mt-1" style={{ color: '#E57373', fontSize: '12px' }}>
-                          <MapPin size={12} />
-                          <span>Actual: {approval.actualLocation}</span>
-                        </div>
-                      )}
                     </div>
                   </td>
                   <td className="py-3 px-4">
                     {approval.flagged ? (
                       <div className="flex items-center gap-2">
                         <AlertTriangle size={16} style={{ color: '#E57373' }} />
-                        <Badge variant="error">Geo-Mismatch</Badge>
+                        <Badge variant="error">Overdue</Badge>
                       </div>
                     ) : (
                       <Badge variant="success">Normal</Badge>
@@ -134,6 +142,7 @@ export function HourApprovalQueue() {
                           borderRadius: '4px'
                         }}
                         title="Approve"
+                        onClick={() => setSuccessApproval(approval)}
                       >
                         <Check size={18} color="#FFFFFF" />
                       </button>
@@ -172,15 +181,22 @@ export function HourApprovalQueue() {
         >
           <AlertTriangle size={20} style={{ color: '#FFB74D', flexShrink: 0, marginTop: '2px' }} />
           <div>
-            <div style={{ color: '#2C3E50', fontWeight: 600, marginBottom: '4px' }}>
-              Geo-Mismatch Detected
+            <div style={{ color: '#E57373', fontWeight: 600, marginBottom: '8px' }}>
+              Overdue Approval
             </div>
             <div style={{ color: '#2C3E50', fontSize: '14px' }}>
-              One or more entries show a location mismatch based on GPS data. Please review and adjust or approve if the volunteer had a valid reason for the discrepancy.
+              One or more entries are overdue for approval (&gt;7 days). Please review and approve or reject promptly to maintain accurate records.
             </div>
           </div>
         </div>
       </div>
+
+      {successApproval && (
+        <HourApprovalSuccess
+          approval={successApproval}
+          onClose={() => setSuccessApproval(null)}
+        />
+      )}
     </div>
   );
 }

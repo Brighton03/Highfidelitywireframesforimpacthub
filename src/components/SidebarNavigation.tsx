@@ -1,4 +1,5 @@
 import { Home, Calendar, Users, FileText, Settings, BarChart3, Database, FileBarChart, DollarSign } from 'lucide-react';
+import logoImage from '../assets/logo-colored.png';
 
 interface SidebarNavigationProps {
   activeItem?: string;
@@ -10,9 +11,7 @@ export function SidebarNavigation({ activeItem = 'Dashboard', onNavigate, userTy
   const coordinatorItems = [
     { label: 'Dashboard', icon: Home },
     { label: 'Events', icon: Calendar },
-    { label: 'Rosters', icon: Users },
     { label: 'Hour Approvals', icon: FileText },
-    { label: 'Reports', icon: BarChart3 },
     { label: 'Settings', icon: Settings }
   ];
 
@@ -29,11 +28,16 @@ export function SidebarNavigation({ activeItem = 'Dashboard', onNavigate, userTy
 
   return (
     <aside 
-      className="w-64 h-screen flex flex-col shadow-lg"
+      className="w-64 min-h-screen flex flex-col shadow-lg"
       style={{ backgroundColor: '#2C3E50' }}
     >
       <div className="p-6 border-b" style={{ borderColor: '#3E5266' }}>
-        <img src={logoImage} alt="ImpactHub" className="h-10" />
+        <img 
+          src={logoImage} 
+          alt="ImpactHub" 
+          className="h-10" 
+          style={{ filter: 'brightness(0) invert(1)' }}
+        />
       </div>
       
       <nav className="flex-1 p-4">
@@ -61,6 +65,8 @@ export function SidebarNavigation({ activeItem = 'Dashboard', onNavigate, userTy
           );
         })}
       </nav>
+      {/* Fill leftover space to avoid white gaps when scrolling */}
+      <div style={{ backgroundColor: '#2C3E50', height: '1px' }} />
     </aside>
   );
 }

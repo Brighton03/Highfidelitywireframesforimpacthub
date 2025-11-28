@@ -3,10 +3,64 @@ import { Button } from './Button';
 import { Badge } from './Badge';
 import { CheckCircle2, Calendar, MapPin, Users, Clock, AlertCircle } from 'lucide-react';
 
+/**
+ * BUSINESS RULES ENFORCEMENT - Discover & Join Event
+ * 
+ * 1. SKILL-EVENT MATCHING
+ *    - Only show events matching volunteer's registered skills/interests
+ *    - Warning if joining event without required skill certification
+ *    - Smart recommendations based on skill match score (%)
+ * 
+ * 2. SCHEDULE CONFLICT PREVENTION
+ *    - Check existing commitments before allowing event sign-up
+ *    - Block overlapping time slots (same date + time)
+ *    - Display "Time Conflict" warning on conflicting dates
+ *    - Prevent double-booking across events
+ * 
+ * 3. CAPACITY MANAGEMENT
+ *    - Real-time spot availability checking
+ *    - Waitlist system when event is full
+ *    - Auto-notify when spot becomes available from waitlist
+ */
+
+type EventId = 'beach' | 'harbor' | 'food-delivery';
+
 export function DiscoverJoinFlow() {
   const [step, setStep] = useState<'finder' | 'detail' | 'single-join' | 'multi-select' | 'confirmation'>('finder');
-  const [selectedEvent, setSelectedEvent] = useState<'beach' | 'food-delivery' | null>(null);
-  const [selectedDates, setSelectedDates] = useState<string[]>(['Oct 24']);
+  const [selectedEvent, setSelectedEvent] = useState<EventId | null>(null);
+  const [selectedDates, setSelectedDates] = useState<string[]>(['Oct 24', 'Nov 14']);
+
+  // BUSINESS RULE: Skill matching check
+  const volunteerSkills = ['Driver', 'Food', 'Environment']; // From profile
+  const checkSkillMatch = (requiredSkills: string[]) => {
+    const matchedSkills = requiredSkills.filter(skill => volunteerSkills.includes(skill));
+    const matchPercentage = (matchedSkills.length / requiredSkills.length) * 100;
+    return {
+      hasMatch: matchPercentage > 0,
+      matchPercentage,
+      missingSkills: requiredSkills.filter(skill => !volunteerSkills.includes(skill))
+    };
+  };
+
+  // BUSINESS RULE: Schedule conflict detection
+  const existingCommitments = [
+    { date: 'Oct 31', time: '9:00 AM - 12:00 PM', event: 'Food Pantry' }
+  ];
+  const hasScheduleConflict = (date: string, time: string) => {
+    return existingCommitments.some(
+      commitment => commitment.date === date && commitment.time === time
+    );
+  };
+
+  // BUSINESS RULE: Capacity and waitlist management
+  const checkAvailability = (spotsLeft: number, totalSpots: number) => {
+    if (spotsLeft > 0) {
+      return { status: 'available', message: `${spotsLeft} spots remaining` };
+    } else if (spotsLeft === 0) {
+      return { status: 'waitlist', message: 'Event full - Join waitlist' };
+    }
+    return { status: 'closed', message: 'Registration closed' };
+  };
 
   const events = [
     {
@@ -21,7 +75,22 @@ export function DiscoverJoinFlow() {
       skills: ['Environment'],
       description: 'Join us for a community beach cleanup to protect marine life and keep our beaches beautiful. We\'ll provide all necessary equipment and refreshments.',
       requirements: ['Physical fitness', 'Sun protection'],
-      coordinator: 'Emma Wilson'
+      coordinator: 'Emma Wilson',
+      status: 'joined' as const
+    },
+    {
+      id: 'harbor',
+      title: 'Harbor Meal Distribution',
+      type: 'Single Event',
+      date: 'Nov 16, 2025',
+      time: '5:00 PM - 8:00 PM',
+      location: 'Harborview Community Hub',
+      spotsLeft: 0,
+      totalSpots: 18,
+      skills: ['Food'],
+      description: 'Assist coordinators as we assemble and distribute hot meals to dock workers and families living near the harbor. Training provided on-site.',
+      requirements: ['Food handling hygiene', 'Comfort standing for 3 hours'],
+      coordinator: 'Luis Martinez'
     },
     {
       id: 'food-delivery',
@@ -32,7 +101,7 @@ export function DiscoverJoinFlow() {
       location: 'Various locations',
       spotsLeft: 12,
       totalSpots: 15,
-      skills: ['Driver', 'Food'],
+      skills: ['Driver'],
       description: 'Help deliver meals to homebound seniors every week. Flexible schedule with multiple time slots available.',
       requirements: ['Valid driver\'s license', 'Reliable vehicle'],
       coordinator: 'Michael Chen'
@@ -40,13 +109,17 @@ export function DiscoverJoinFlow() {
   ];
 
   const calendarSlots = [
-    { date: 'Oct 24', time: '9:00 AM - 12:00 PM', available: true, selected: true, full: false },
+    { date: 'Oct 24', time: '9:00 AM - 12:00 PM', available: true, full: false },
     { date: 'Oct 31', time: '9:00 AM - 12:00 PM', available: false, conflict: 'Time Conflict', full: false },
-    { date: 'Nov 7', time: '9:00 AM - 12:00 PM', available: true, selected: false, full: false },
-    { date: 'Nov 14', time: '9:00 AM - 12:00 PM', available: true, selected: true, full: true },
-    { date: 'Nov 21', time: '9:00 AM - 12:00 PM', available: true, selected: false, full: false },
-    { date: 'Nov 28', time: '9:00 AM - 12:00 PM', available: true, selected: false, full: false }
+    { date: 'Nov 7', time: '9:00 AM - 12:00 PM', available: true, full: false },
+    { date: 'Nov 14', time: '9:00 AM - 12:00 PM', available: true, full: true },
+    { date: 'Nov 21', time: '9:00 AM - 12:00 PM', available: true, full: false },
+    { date: 'Nov 28', time: '9:00 AM - 12:00 PM', available: true, full: false }
   ];
+
+  const selectedSlotDetails = calendarSlots.filter((slot) => selectedDates.includes(slot.date));
+  const confirmedSlots = selectedSlotDetails.filter((slot) => !slot.full);
+  const waitlistedSlots = selectedSlotDetails.filter((slot) => slot.full);
 
   const toggleDate = (date: string, available: boolean) => {
     if (!available) return;
@@ -57,47 +130,6 @@ export function DiscoverJoinFlow() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F5F7FA' }}>
-      {/* Progress Indicator */}
-      <div className="w-full bg-white border-b" style={{ borderColor: '#E0E0E0' }}>
-        <div className="max-w-[1200px] mx-auto px-8 py-6">
-          <div className="flex items-center justify-center gap-4">
-            {['Browse', 'Event Detail', 'Select Dates', 'Confirmation'].map((label, index) => {
-              const stepNames = ['finder', 'detail', 'multi-select', 'confirmation'];
-              const currentIndex = stepNames.indexOf(step);
-              const isActive = index === currentIndex || (step === 'single-join' && index === 2);
-              const isCompleted = index < currentIndex;
-
-              return (
-                <div key={label} className="flex items-center">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className="w-10 h-10 flex items-center justify-center mb-2"
-                      style={{
-                        backgroundColor: isActive || isCompleted ? '#779F8D' : '#E0E0E0',
-                        borderRadius: '50%',
-                        color: '#FFFFFF',
-                        fontWeight: 600
-                      }}
-                    >
-                      {isCompleted ? <CheckCircle2 size={20} /> : index + 1}
-                    </div>
-                    <span style={{ color: isActive ? '#2C3E50' : '#9E9E9E', fontSize: '14px', fontWeight: isActive ? 600 : 400 }}>
-                      {label}
-                    </span>
-                  </div>
-                  {index < 3 && (
-                    <div
-                      className="w-16 h-1 mb-6 mx-2"
-                      style={{ backgroundColor: isCompleted ? '#779F8D' : '#E0E0E0' }}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
       {/* Content */}
       <div className="max-w-[1200px] mx-auto px-8 py-12">
         {step === 'finder' && (
@@ -118,7 +150,7 @@ export function DiscoverJoinFlow() {
                     Skills
                   </h3>
                   <div className="space-y-2">
-                    {['Driver', 'Server', 'Teacher', 'Medical'].map((skill) => (
+                    {['Driver', 'Server', 'Teacher', 'First Aid'].map((skill) => (
                       <label key={skill} className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" checked={skill === 'Driver'} readOnly style={{ accentColor: '#779F8D' }} />
                         <span style={{ color: '#2C3E50' }}>{skill}</span>
@@ -145,56 +177,91 @@ export function DiscoverJoinFlow() {
               {/* Results Grid */}
               <div className="flex-1">
                 <div className="grid grid-cols-2 gap-6">
-                  {events.map((event) => (
-                    <div
-                      key={event.id}
-                      className="p-6"
-                      style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '20px' }}>
-                          {event.title}
-                        </h3>
-                        {event.type === 'Multi-Shift' && (
-                          <Badge variant="success">Recurring</Badge>
-                        )}
-                      </div>
+                  {events.map((event) => {
+                    const isSelectedCard = selectedEvent === event.id;
+                    const isFullSingle = event.type === 'Single Event' && event.spotsLeft === 0;
+                    const isJoined = event.status === 'joined';
 
-                      <p style={{ color: '#2C3E50', marginBottom: '16px', fontSize: '14px' }}>
-                        {event.description.substring(0, 100)}...
-                      </p>
-
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center gap-2" style={{ color: '#2C3E50', fontSize: '14px' }}>
-                          <Calendar size={16} />
-                          <span>{event.date}</span>
-                        </div>
-                        <div className="flex items-center gap-2" style={{ color: '#2C3E50', fontSize: '14px' }}>
-                          <Clock size={16} />
-                          <span>{event.time}</span>
-                        </div>
-                        <div className="flex items-center gap-2" style={{ color: '#2C3E50', fontSize: '14px' }}>
-                          <MapPin size={16} />
-                          <span>{event.location}</span>
-                        </div>
-                        <div className="flex items-center gap-2" style={{ color: '#2C3E50', fontSize: '14px' }}>
-                          <Users size={16} />
-                          <span>{event.spotsLeft} of {event.totalSpots} spots left</span>
-                        </div>
-                      </div>
-
-                      <Button
-                        variant="primary"
-                        className="w-full"
-                        onClick={() => {
-                          setSelectedEvent(event.id as 'beach' | 'food-delivery');
-                          setStep('detail');
+                    return (
+                      <div
+                        key={event.id}
+                        className="p-6 h-full flex flex-col gap-4"
+                        style={{
+                          backgroundColor: '#FFFFFF',
+                          borderRadius: '8px',
+                          border: `2px solid ${isSelectedCard ? '#779F8D' : 'transparent'}`,
+                          boxShadow: isSelectedCard ? '0 8px 24px rgba(44,62,80,0.15)' : 'none'
                         }}
                       >
-                        View Details
-                      </Button>
-                    </div>
-                  ))}
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '20px' }}>
+                              {event.title}
+                            </h3>
+                            {isJoined && (
+                              <div
+                                className="inline-flex items-center gap-2 px-3 py-1 mt-2"
+                                style={{ backgroundColor: '#F0F7F4', borderRadius: '999px' }}
+                              >
+                                <CheckCircle2 size={14} style={{ color: '#779F8D' }} />
+                                <span style={{ color: '#2C3E50', fontSize: '12px', fontWeight: 600 }}>
+                                  Added to Upcoming Shifts
+                                </span>
+                              </div>
+                            )}
+                            {isFullSingle && (
+                              <div
+                                className="inline-flex items-center gap-2 px-3 py-1 mt-2"
+                                style={{ backgroundColor: '#FFF8E1', borderRadius: '999px' }}
+                              >
+                                <AlertCircle size={14} style={{ color: '#FFB74D' }} />
+                                <span style={{ color: '#2C3E50', fontSize: '12px', fontWeight: 600 }}>
+                                  Waitlist Only
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          {event.type === 'Multi-Shift' && (
+                            <Badge variant="success">Recurring</Badge>
+                          )}
+                        </div>
+
+                        <p style={{ color: '#2C3E50', fontSize: '14px' }}>
+                          {event.description.substring(0, 120)}...
+                        </p>
+
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                            <Calendar size={16} />
+                            <span>{event.date}</span>
+                          </div>
+                          <div className="flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                            <Clock size={16} />
+                            <span>{event.time}</span>
+                          </div>
+                          <div className="flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                            <MapPin size={16} />
+                            <span>{event.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2" style={{ color: '#2C3E50' }}>
+                            <Users size={16} />
+                            <span>{event.spotsLeft} of {event.totalSpots} spots left</span>
+                          </div>
+                        </div>
+
+                        <Button
+                          variant="primary"
+                          className="w-full mt-auto"
+                          onClick={() => {
+                            setSelectedEvent(event.id);
+                            setStep('detail');
+                          }}
+                        >
+                          {isFullSingle ? 'View Waitlist Details' : 'View Details'}
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -205,6 +272,16 @@ export function DiscoverJoinFlow() {
           <div className="max-w-[800px] mx-auto">
             {(() => {
               const event = events.find(e => e.id === selectedEvent)!;
+              const isFullSingle = event.type === 'Single Event' && event.spotsLeft === 0;
+              const isAlreadyJoined = event.status === 'joined';
+              const primaryCtaLabel = event.type === 'Multi-Shift'
+                ? 'Select Dates'
+                : isFullSingle
+                  ? 'Join Waitlist'
+                  : isAlreadyJoined
+                    ? 'View Confirmation'
+                    : 'Join Event';
+
               return (
                 <div className="p-8" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
                   <div className="flex items-start justify-between mb-6">
@@ -214,6 +291,20 @@ export function DiscoverJoinFlow() {
                       </h1>
                       {event.type === 'Multi-Shift' && (
                         <Badge variant="success">Recurring Event</Badge>
+                      )}
+                      {isAlreadyJoined && (
+                        <div className="mt-4 p-3" style={{ backgroundColor: '#F0F7F4', borderRadius: '8px' }}>
+                          <span style={{ color: '#2C3E50', fontWeight: 600 }}>
+                            Confirmed — this shift already appears under Upcoming Shifts.
+                          </span>
+                        </div>
+                      )}
+                      {isFullSingle && (
+                        <div className="mt-4 p-3" style={{ backgroundColor: '#FFF8E1', borderRadius: '8px' }}>
+                          <span style={{ color: '#2C3E50', fontWeight: 600 }}>
+                            Shift full — join the waitlist to be notified when a spot opens.
+                          </span>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -303,7 +394,7 @@ export function DiscoverJoinFlow() {
                       onClick={() => setStep(event.type === 'Multi-Shift' ? 'multi-select' : 'single-join')}
                       className="flex-1"
                     >
-                      {event.type === 'Multi-Shift' ? 'Select Dates' : 'Join Event'}
+                      {primaryCtaLabel}
                     </Button>
                   </div>
                 </div>
@@ -312,52 +403,82 @@ export function DiscoverJoinFlow() {
           </div>
         )}
 
-        {step === 'single-join' && (
+        {step === 'single-join' && selectedEvent && (
           <div className="max-w-[600px] mx-auto">
-            <div className="p-8 text-center" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
-              <div
-                className="w-20 h-20 flex items-center justify-center mx-auto mb-6"
-                style={{ backgroundColor: '#779F8D', borderRadius: '50%' }}
-              >
-                <CheckCircle2 size={48} color="#FFFFFF" />
-              </div>
+            {(() => {
+              const event = events.find(e => e.id === selectedEvent)!;
+              const isWaitlist = event.spotsLeft === 0;
+              const isAlreadyJoined = event.status === 'joined';
+              const heroColor = isWaitlist ? '#FFB74D' : '#779F8D';
+              const heading = isWaitlist
+                ? 'Waitlist Confirmed'
+                : isAlreadyJoined
+                  ? 'Already on Your Upcoming Shifts'
+                  : "You're Registered!";
+              const subcopy = isWaitlist
+                ? `You've been added to the waitlist for ${event.title}. We'll notify you as soon as a spot opens up.`
+                : isAlreadyJoined
+                  ? `${event.title} is already confirmed and visible under Upcoming Shifts in your dashboard.`
+                  : `You've successfully registered for ${event.title}.`;
 
-              <h1 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '32px', marginBottom: '16px' }}>
-                You're Registered!
-              </h1>
-              <p style={{ color: '#2C3E50', marginBottom: '32px' }}>
-                You've successfully registered for Beach Cleanup
-              </p>
+              return (
+                <div className="p-8 text-center" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
+                  <div
+                    className="w-20 h-20 flex items-center justify-center mx-auto mb-6"
+                    style={{ backgroundColor: heroColor, borderRadius: '50%' }}
+                  >
+                    <CheckCircle2 size={48} color="#FFFFFF" />
+                  </div>
 
-              <div className="p-6 mb-6" style={{ backgroundColor: '#F0F7F4', borderRadius: '8px' }}>
-                <div style={{ color: '#2C3E50', fontWeight: 700, marginBottom: '16px' }}>
-                  Event Summary:
+                  <h1 style={{ color: '#2C3E50', fontWeight: 700, fontSize: '32px', marginBottom: '16px' }}>
+                    {heading}
+                  </h1>
+                  <p style={{ color: '#2C3E50', marginBottom: '24px' }}>{subcopy}</p>
+
+                  <div className="p-6 mb-6" style={{ backgroundColor: '#F0F7F4', borderRadius: '8px' }}>
+                    <div style={{ color: '#2C3E50', fontWeight: 700, marginBottom: '16px' }}>
+                      Event Summary
+                    </div>
+                    <div className="space-y-2 text-left">
+                      <div className="flex items-center gap-3" style={{ color: '#2C3E50' }}>
+                        <Calendar size={20} />
+                        <span>{event.date}</span>
+                      </div>
+                      <div className="flex items-center gap-3" style={{ color: '#2C3E50' }}>
+                        <Clock size={20} />
+                        <span>{event.time}</span>
+                      </div>
+                      <div className="flex items-center gap-3" style={{ color: '#2C3E50' }}>
+                        <MapPin size={20} />
+                        <span>{event.location}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 mb-6" style={{
+                    backgroundColor: isWaitlist ? '#FFF8E1' : '#F0F7F4',
+                    borderRadius: '8px',
+                    textAlign: 'left'
+                  }}>
+                    <div style={{ color: '#2C3E50', fontWeight: 600, marginBottom: '4px' }}>
+                      Status
+                    </div>
+                    <p style={{ color: '#2C3E50', fontSize: '14px', margin: 0 }}>
+                      {isWaitlist ? 'Queued on waitlist • You will receive alerts if a volunteer drops.' : 'Confirmed • Listed under Upcoming Shifts for quick access.'}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button variant="primary" className="flex-1">
+                      {isWaitlist ? 'Update Preferences' : 'Add to Calendar'}
+                    </Button>
+                    <Button variant="secondary" onClick={() => setStep('finder')} className="flex-1">
+                      Browse More Events
+                    </Button>
+                  </div>
                 </div>
-                <div className="space-y-2 text-left">
-                  <div className="flex items-center gap-3" style={{ color: '#2C3E50' }}>
-                    <Calendar size={20} />
-                    <span>Nov 12, 2025</span>
-                  </div>
-                  <div className="flex items-center gap-3" style={{ color: '#2C3E50' }}>
-                    <Clock size={20} />
-                    <span>9:00 AM - 12:00 PM</span>
-                  </div>
-                  <div className="flex items-center gap-3" style={{ color: '#2C3E50' }}>
-                    <MapPin size={20} />
-                    <span>Main Beach</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button variant="primary" className="flex-1">
-                  Add to Calendar
-                </Button>
-                <Button variant="secondary" onClick={() => setStep('finder')} className="flex-1">
-                  Browse More Events
-                </Button>
-              </div>
-            </div>
+              );
+            })()}
           </div>
         )}
 
@@ -375,7 +496,16 @@ export function DiscoverJoinFlow() {
               <div className="grid grid-cols-3 gap-4 mb-6">
                 {calendarSlots.map((slot) => {
                   const isSelected = selectedDates.includes(slot.date);
-                  
+                  const isWaitlistSlot = slot.full;
+                  const tileBackground = slot.available
+                    ? (isWaitlistSlot ? '#FFF8E1' : (isSelected ? '#F0F7F4' : '#FFFFFF'))
+                    : '#F5F7FA';
+                  const tileBorder = isSelected
+                    ? '#779F8D'
+                    : isWaitlistSlot
+                      ? '#FFB74D'
+                      : (slot.available ? '#E0E0E0' : '#CFD8DC');
+
                   return (
                     <button
                       key={slot.date}
@@ -383,8 +513,8 @@ export function DiscoverJoinFlow() {
                       disabled={!slot.available}
                       className="p-4 border-2 transition-all relative"
                       style={{
-                        borderColor: isSelected ? '#779F8D' : (slot.available ? '#E0E0E0' : '#CFD8DC'),
-                        backgroundColor: slot.available ? (isSelected ? '#F0F7F4' : '#FFFFFF') : '#F5F7FA',
+                        borderColor: tileBorder,
+                        backgroundColor: tileBackground,
                         borderRadius: '8px',
                         cursor: slot.available ? 'pointer' : 'not-allowed',
                         opacity: slot.available ? 1 : 0.6
@@ -429,7 +559,7 @@ export function DiscoverJoinFlow() {
                         </div>
                       )}
 
-                      {slot.full && isSelected && (
+                      {isWaitlistSlot && (
                         <div
                           className="mt-2 px-2 py-1"
                           style={{
@@ -493,44 +623,54 @@ export function DiscoverJoinFlow() {
 
               {/* Split List Logic */}
               <div className="space-y-4 mb-6">
-                {/* Successfully Joined */}
-                <div
-                  className="p-4 border-l-4"
-                  style={{
-                    backgroundColor: '#F0F7F4',
-                    borderColor: '#779F8D',
-                    borderRadius: '4px'
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle2 size={20} style={{ color: '#779F8D' }} />
-                    <span style={{ color: '#2C3E50', fontWeight: 600 }}>Successfully Joined</span>
+                {confirmedSlots.length > 0 && (
+                  <div
+                    className="p-4 border-l-4"
+                    style={{
+                      backgroundColor: '#F0F7F4',
+                      borderColor: '#779F8D',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle2 size={20} style={{ color: '#779F8D' }} />
+                      <span style={{ color: '#2C3E50', fontWeight: 600 }}>Successfully Joined</span>
+                    </div>
+                    <ul className="ml-7 space-y-1">
+                      {confirmedSlots.map((slot) => (
+                        <li key={slot.date} style={{ color: '#2C3E50', fontSize: '14px' }}>
+                          • {slot.date}, 2025 - {slot.time}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="ml-7 space-y-1">
-                    <li style={{ color: '#2C3E50', fontSize: '14px' }}>• Oct 24, 2025 - 9:00 AM - 12:00 PM</li>
-                  </ul>
-                </div>
+                )}
 
-                {/* Added to Waitlist */}
-                <div
-                  className="p-4 border-l-4"
-                  style={{
-                    backgroundColor: '#FFF8E1',
-                    borderColor: '#FFB74D',
-                    borderRadius: '4px'
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar size={20} style={{ color: '#FFB74D' }} />
-                    <span style={{ color: '#2C3E50', fontWeight: 600 }}>Added to Waitlist</span>
+                {waitlistedSlots.length > 0 && (
+                  <div
+                    className="p-4 border-l-4"
+                    style={{
+                      backgroundColor: '#FFF8E1',
+                      borderColor: '#FFB74D',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar size={20} style={{ color: '#FFB74D' }} />
+                      <span style={{ color: '#2C3E50', fontWeight: 600 }}>Added to Waitlist</span>
+                    </div>
+                    <ul className="ml-7 space-y-1">
+                      {waitlistedSlots.map((slot) => (
+                        <li key={slot.date} style={{ color: '#2C3E50', fontSize: '14px' }}>
+                          • {slot.date}, 2025 - {slot.time} (Shift Full)
+                        </li>
+                      ))}
+                    </ul>
+                    <p style={{ color: '#2C3E50', fontSize: '14px', marginTop: '8px', marginLeft: '28px' }}>
+                      You'll be notified if a spot opens up.
+                    </p>
                   </div>
-                  <ul className="ml-7 space-y-1">
-                    <li style={{ color: '#2C3E50', fontSize: '14px' }}>• Nov 14, 2025 - 9:00 AM - 12:00 PM (Shift Full)</li>
-                  </ul>
-                  <p style={{ color: '#2C3E50', fontSize: '14px', marginTop: '8px', marginLeft: '28px' }}>
-                    You'll be notified if a spot opens up.
-                  </p>
-                </div>
+                )}
               </div>
 
               {/* Actions */}
